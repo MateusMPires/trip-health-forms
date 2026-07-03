@@ -1,0 +1,41 @@
+# Dependências
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+.next/
+out/
+.turbo/
+.expo/
+web-build/
+
+# Ambiente / segredos
+.env
+.env.*
+!.env.example
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Mobile / nativo
+*.keystore
+*.p8
+*.p12
+*.mobileprovision
+ios/Pods/
+android/.gradle/
+android/app/build/
+
+# Logs e sistema
+*.log
+npm-debug.log*
+.DS_Store
+coverage/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
