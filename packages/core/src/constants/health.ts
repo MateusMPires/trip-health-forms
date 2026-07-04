@@ -6,6 +6,24 @@
 // Age at/above which a traveler is not a minor (drives is_minor + guardian requirement).
 export const MINOR_AGE_THRESHOLD = 18;
 
+// Blood type options for the required select. `unknown` is the "Não sei" answer — stored
+// verbatim in health_records.blood_type (a text column), so no DB enum is needed.
+// Minimum length for the (alphanumeric) health-insurance card number.
+export const INSURANCE_CARD_MIN_LENGTH = 3;
+
+export const BLOOD_TYPES = [
+  'A+',
+  'A-',
+  'B+',
+  'B-',
+  'AB+',
+  'AB-',
+  'O+',
+  'O-',
+  'unknown',
+] as const;
+export type BloodType = (typeof BLOOD_TYPES)[number];
+
 // Page 2 — "Possui alguma doença ou condição médica? Se sim, qual?"
 export const MEDICAL_CONDITIONS = [
   'asthma',

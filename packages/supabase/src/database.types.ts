@@ -223,6 +223,7 @@ export type Database = {
           deleted_at: string | null
           dietary_restrictions: string | null
           has_allergies: boolean | null
+          has_dietary_restriction: boolean | null
           has_health_insurance: boolean | null
           has_medical_conditions: boolean | null
           has_physical_limitation: boolean | null
@@ -246,6 +247,7 @@ export type Database = {
           deleted_at?: string | null
           dietary_restrictions?: string | null
           has_allergies?: boolean | null
+          has_dietary_restriction?: boolean | null
           has_health_insurance?: boolean | null
           has_medical_conditions?: boolean | null
           has_physical_limitation?: boolean | null
@@ -269,6 +271,7 @@ export type Database = {
           deleted_at?: string | null
           dietary_restrictions?: string | null
           has_allergies?: boolean | null
+          has_dietary_restriction?: boolean | null
           has_health_insurance?: boolean | null
           has_medical_conditions?: boolean | null
           has_physical_limitation?: boolean | null
@@ -532,6 +535,7 @@ export type Database = {
     }
     Functions: {
       generate_trip_access_code: { Args: never; Returns: string }
+      get_trip_public: { Args: { p_code: string }; Returns: string }
       is_org_member: { Args: { p_organization_id: string }; Returns: boolean }
       is_trip_admin: { Args: { p_trip_id: string }; Returns: boolean }
       is_trip_member: { Args: { p_trip_id: string }; Returns: boolean }

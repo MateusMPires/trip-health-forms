@@ -62,7 +62,7 @@ schema_paths = []
 enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-sql_paths = ["./seed.sql"]
+sql_paths = ["./seed/0001_first_organization.sql"]
 
 [db.network_restrictions]
 # Enable management of network restrictions.
@@ -379,6 +379,12 @@ deno_version = 2
 
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
+
+# Public form upload endpoint — anonymous, so JWT verification is disabled. It validates the
+# trip access code itself and only ever returns a scoped signed upload URL.
+[functions.request-upload-url]
+enabled = true
+verify_jwt = false
 
 [analytics]
 enabled = true

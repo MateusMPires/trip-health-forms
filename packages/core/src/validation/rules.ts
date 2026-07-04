@@ -1,9 +1,6 @@
 import type { GuardianInput } from '../schemas/guardian';
 import type { ConsentInput } from '../schemas/consent';
-import { REQUIRED_CONSENT_KINDS } from '../constants/enums';
-
-// The form uses "xx" as the guardian name/document sentinel for travelers aged 18+.
-const GUARDIAN_ABSENT_SENTINEL = 'xx';
+import { REQUIRED_CONSENT_KINDS, GUARDIAN_ABSENT_SENTINEL } from '../constants/enums';
 
 /**
  * A responsible guardian is one with a real name — not empty and not the "xx" sentinel the

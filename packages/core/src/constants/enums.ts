@@ -3,6 +3,10 @@
 export const TRAVELER_SEX = ['male', 'female', 'other', 'prefer_not_say'] as const;
 export type TravelerSex = (typeof TRAVELER_SEX)[number];
 
+// The form types "xx" into the guardian name/document fields for travelers aged 18+ (no legal
+// guardian). Shared so both the "responsible guardian" rule and the CPF validation know it.
+export const GUARDIAN_ABSENT_SENTINEL = 'xx';
+
 export const DOCUMENT_KINDS = ['identity_document', 'authorization', 'photo', 'other'] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 

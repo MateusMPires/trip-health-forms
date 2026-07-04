@@ -39,3 +39,6 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Local Claude Code skills/tooling
+.claude/

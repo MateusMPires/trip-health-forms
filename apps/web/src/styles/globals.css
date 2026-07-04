@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens — light mode only, light-turquoise accent ("azul turquesa claro").
+ * Declared under @theme so Tailwind v4 generates the matching utilities
+ * (bg-surface, text-foreground, border-border, bg-primary, ring-primary, ...).
+ */
+@theme {
+  --color-background: #f2fbfc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #edf7f9;
+  --color-foreground: #0e2a2f;
+  --color-muted: #5c7378;
+  --color-border: #d8e8eb;
+  --color-border-strong: #b9d6db;
+
+  --color-primary: #12b3c4;
+  --color-primary-hover: #0d95a4;
+  --color-primary-foreground: #ffffff;
+  --color-primary-soft: #e0f6f9;
+
+  --color-danger: #dc2626;
+  --color-danger-soft: #fdecec;
+  --color-success: #0f9d76;
+
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+
+  --shadow-card: 0 1px 2px rgba(14, 42, 47, 0.04), 0 12px 32px -12px rgba(14, 42, 47, 0.12);
+}
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* A soft turquoise aurora behind the form, purely decorative. */
+body {
+  min-height: 100dvh;
+  background-image:
+    radial-gradient(60rem 60rem at 15% -10%, rgba(18, 179, 196, 0.1), transparent 55%),
+    radial-gradient(50rem 50rem at 110% 10%, rgba(18, 179, 196, 0.08), transparent 50%);
+  background-attachment: fixed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
