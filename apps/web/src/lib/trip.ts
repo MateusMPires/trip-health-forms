@@ -13,10 +13,16 @@ export async function getTripPublic(code: string): Promise<TripLookup> {
   // Preview: skip validation entirely so the form renders with just `pnpm dev`.
   if (isPreview()) return { status: 'found', name: 'Viagem de Teste (preview)' };
 
-  const supabase = getSupabaseBrowserClient();
-  const { data, error } = await supabase.rpc('get_trip_public', { p_code: code });
+  // Any thrown/rejected path (missing env, network hang, RPC failure) must resolve to a terminal
+  // state — otherwise the landing screen is stuck on "Validando…" forever.
+  try {
+    const supabase = getSupabaseBrowserClient();
+    const { data, error } = await supabase.rpc('get_trip_public', { p_code: code });
 
-  if (error) return { status: 'error' };
-  if (!data) return { status: 'not_found' };
-  return { status: 'found', name: data };
+    if (error) return { status: 'error' };
+    if (!data) return { status: 'not_found' };
+    return { status: 'found', name: data };
+  } catch {
+    return { status: 'error' };
+  }
 }

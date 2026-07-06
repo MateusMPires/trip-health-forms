@@ -49,6 +49,27 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/*
+ * iOS Safari renders native date controls with their own intrinsic width and a
+ * collapsed value box, so the field overflows its card and the date never shows.
+ * Strip the native chrome, force a fixed height, and left-align the value.
+ */
+input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  min-height: 3rem;
+}
+
+input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator {
+  margin-left: auto;
+}
+
 html,
 body {
   background-color: var(--color-background);
