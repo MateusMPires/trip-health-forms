@@ -13,6 +13,12 @@ Built as a portfolio piece by an **AI Product Engineer**: it pairs a production-
   <img alt="Zod" src="https://img.shields.io/badge/Zod-domain_contract-3E67B1">
 </p>
 
+<p align="center">
+  <img alt="Traveler intake form — health plan step" src="./docs/web-form-health-plan.png" width="720">
+  <br>
+  <em>Public traveler intake — the multi-step wizard, health-plan section.</em>
+</p>
+
 ---
 
 ## What this project demonstrates
@@ -37,6 +43,20 @@ Two surfaces over one Supabase backend:
 | **Mobile app** (`apps/mobile`) | Leaders log in and browse the travelers on their trips, fully **offline** (SQLite mirroring Supabase, pull-based `server-wins` sync). | Trip leaders | **Login** (Supabase Auth) |
 
 > **Status:** the web intake form is fully implemented (7-step wizard, uploads, validation, consent). The mobile app is scaffolded and on the roadmap below — this README is explicit about what's built vs. planned.
+
+---
+
+## Product & UX design
+
+The form is filled out by **parents and volunteers on their phones**, often in a hurry and not always tech-savvy — so the interface is deliberately **minimalist and modern to lower friction**, not for decoration. Design decisions are intentional product choices:
+
+- **One question at a time, in sections.** The intake is broken into a numbered, sectioned wizard (`SEÇÃO 03 / 06`) with a single clear ask per block, so a long, intimidating health form reads as a short, guided flow.
+- **Progressive disclosure.** Conditional fields appear only when relevant — e.g. the insurance operator, plan tier, and card photo surface *only after* "Possui plano de saúde? → Sim". No dead fields, no clutter.
+- **Restraint as a system.** A near-monochrome palette with a single accent used *only* for focus/hover states, generous whitespace, rounded inputs, and clear required/optional cues (`*`) keep attention on the content — the design tokens enforce this consistently rather than ad-hoc styling.
+- **Mobile-first, honestly tested.** Because most submissions come from phones, native controls (date pickers, file uploads) are normalized so they behave correctly on iOS Safari and Android — the kind of detail that quietly decides whether a real user finishes the form.
+- **Plain, reassuring copy.** Hints and examples (`Ex.: Unimed`, "Imagem única, até 10 MB") reduce uncertainty, and the flow constantly signals that the data is confidential and used only by the trip's team.
+
+The goal: a form handling sensitive health data that a non-technical user can complete on a phone in minutes, without confusion or abandonment.
 
 ---
 
