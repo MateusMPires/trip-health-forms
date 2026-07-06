@@ -1,213 +1,175 @@
-# Viagem Missionária
+# trip-health-forms
 
-Plataforma para **capturar, armazenar e consultar** os dados de cada viajante de uma viagem
-missionária — dados pessoais, informações de saúde e documentos/autorizações — disponibilizando
-essas informações aos **líderes da viagem**, com acesso **online e offline**.
+**A multi-tenant, privacy-first platform for collecting and managing sensitive traveler data — personal details, health records, and documents — for missionary trips, online and offline.**
 
----
+Built as a portfolio piece by an **AI Product Engineer**: it pairs a production-grade product architecture (multi-tenant RLS, defense-in-depth, LGPD compliance) with a **codified engineering harness** that governs how an AI coding agent is allowed to build the system.
 
-## 1. Visão geral
-
-O produto tem duas superfícies:
-
-| Superfície | O que é | Quem usa | Acesso |
-|-----------|---------|----------|--------|
-| **Formulário web** | Formulário customizado multi-etapas para o cadastro do viajante (dados pessoais, saúde, documentos, consentimento LGPD e, para menores, dados do responsável). | Viajante (ou responsável) | **Link público** com código da viagem, sem conta |
-| **App mobile** | App React Native que lista todos os viajantes de uma viagem e seus detalhes. Funciona **offline**. | Líderes da viagem | **Login** (Supabase Auth) |
-
-Os dados são coletados no formulário, armazenados no **Supabase** e sincronizados para o
-armazenamento **local (SQLite)** do app, permitindo que os líderes consultem tudo mesmo sem
-internet durante a viagem.
+<p>
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-App_Router-000000?logo=nextdotjs&logoColor=white">
+  <img alt="Expo" src="https://img.shields.io/badge/Expo-React_Native-000020?logo=expo&logoColor=white">
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Postgres_·_RLS-3FCF8E?logo=supabase&logoColor=white">
+  <img alt="Turborepo" src="https://img.shields.io/badge/Turborepo-pnpm-EF4444?logo=turborepo&logoColor=white">
+  <img alt="Zod" src="https://img.shields.io/badge/Zod-domain_contract-3E67B1">
+</p>
 
 ---
 
-## 2. Arquitetura
+## What this project demonstrates
 
-```
-┌──────────────────────┐        ┌──────────────────────┐
-│   Formulário Web      │        │     App Mobile        │
-│   (Next.js, público)  │        │  (Expo/React Native)  │
-│                       │        │  login dos líderes    │
-└──────────┬───────────┘        └───────────┬──────────┘
-           │ escrita (insert)               │ pull sync + leitura
-           ▼                                ▼
-        ┌────────────────────────────────────────┐
-        │              Supabase                    │
-        │  Postgres (RLS) · Auth · Storage         │
-        └────────────────────────────────────────┘
-                          ▲
-                          │ contrato de domínio compartilhado
-                 ┌────────┴─────────┐
-                 │  packages/core    │  (schemas Zod, tipos, regras)
-                 │  packages/supabase│  (client + tipos gerados)
-                 └───────────────────┘
-```
+This isn't a CRUD demo. The interesting engineering is in the **trust boundaries** and the **build discipline**:
 
-- O **viajante** (dados pessoais + saúde + documentos + consentimento) é o mesmo contrato nas duas
-  superfícies. Ele é definido **uma única vez** em `packages/core` e reutilizado por web e mobile,
-  evitando divergência de schema.
-- O app é **read-mostly**: sincroniza (pull) os dados do Supabase para o SQLite e resolve conflitos
-  com *server-wins*.
+- **Zero-trust public intake.** An anonymous web form *writes* sensitive data but can *never read* it — enforced at the database, not the app layer.
+- **Defense in depth for file uploads.** The public client never touches the private storage bucket directly; a server-side Edge Function mints a single-object, short-lived signed upload URL and builds the storage path itself.
+- **A single source of truth for the domain.** The "traveler" contract is defined once in Zod (`packages/core`) and reused by web and mobile — no schema drift.
+- **LGPD by construction.** Consent gating, minor-guardian rules, and a hard "never log sensitive data" invariant are baked into the schema and the workflow, not bolted on.
+- **An AI engineering harness.** The repo ships a machine-and-human-checkable *constitution* (`CLAUDE.md`) that constrains how the AI agent writes code — turning "AI-assisted" into "AI-governed."
 
 ---
 
-## 3. Stack
+## The product
 
-- **Monorepo:** Turborepo + pnpm workspaces
-- **Web:** Next.js (App Router), TypeScript
-- **Mobile:** Expo + EAS, React Native, expo-router, SQLite (expo-sqlite / op-sqlite)
-- **Backend:** Supabase (Postgres + Auth + Storage), multi-tenant com RLS
-- **Validação/domínio:** Zod (em `packages/core`)
-- **Distribuição:** EAS Build → **TestFlight** (iOS) e **Firebase App Distribution** (Android)
+Two surfaces over one Supabase backend:
 
----
+| Surface | What it is | Who uses it | Access |
+|---|---|---|---|
+| **Web form** (`apps/web`) | Multi-step wizard to register a traveler: personal data, health block, documents, LGPD consent, and (for minors) guardian data. | Traveler / guardian | **Public link** with a 6-digit trip code — no account |
+| **Mobile app** (`apps/mobile`) | Leaders log in and browse the travelers on their trips, fully **offline** (SQLite mirroring Supabase, pull-based `server-wins` sync). | Trip leaders | **Login** (Supabase Auth) |
 
-## 4. Estrutura de pastas
-
-```
-viagem-missionaria/
-├── apps/
-│   ├── web/        # Next.js — formulário público do viajante
-│   └── mobile/     # Expo (React Native) — app dos líderes
-├── packages/
-│   ├── core/       # domínio compartilhado: schemas Zod, tipos, regras, constantes
-│   ├── supabase/   # client Supabase + tipos gerados + queries reutilizáveis
-│   ├── ui/         # (opcional) design tokens compartilhados
-│   └── config/     # tsconfig / eslint / prettier compartilhados
-├── supabase/       # migrations, políticas RLS, seed, edge functions
-├── turbo.json
-├── pnpm-workspace.yaml
-└── package.json
-```
-
-Cada app é **feature-based**: `app/` cuida apenas de roteamento/layout e cada `features/<feature>/`
-concentra components, hooks e acesso a dados daquela funcionalidade.
-
-**`apps/web/src`**
-```
-app/                          # App Router (roteamento/layout)
-  (public)/viagem/[codigo]/   # formulário público por código da viagem
-features/
-  traveler-form/  steps/ components/ hooks/   # formulário multi-etapas
-  documents/                  # upload → Supabase Storage
-  health-info/                # bloco de saúde
-  consent/                    # LGPD + autorização de menores
-components/  lib/  styles/
-```
-
-**`apps/mobile/src`**
-```
-app/                          # expo-router
-  (auth)/                     # login
-  (app)/trips/                # lista de viagens do líder
-  (app)/travelers/[id]/       # detalhe do viajante
-features/
-  auth/  trips/  travelers/  documents/  health/
-  sync/                       # motor de sincronização SQLite ⇄ Supabase
-db/  lib/  components/  theme/
-```
-
-**`packages/core/src`**
-```
-schemas/  types/  constants/  validation/
-```
+> **Status:** the web intake form is fully implemented (7-step wizard, uploads, validation, consent). The mobile app is scaffolded and on the roadmap below — this README is explicit about what's built vs. planned.
 
 ---
 
-## 5. Pré-requisitos
+## Architecture
 
-- **Node** ≥ 20
-- **pnpm** ≥ 9
-- **Supabase CLI** (migrations, tipos, ambiente local)
-- **EAS CLI** (`eas-cli`) para builds do app mobile
-- Contas: Supabase, Apple Developer (TestFlight), Firebase (App Distribution)
+```
+        Anonymous traveler                       Authenticated leader
+   ┌─────────────────────────┐              ┌─────────────────────────┐
+   │   Web form (Next.js)     │              │  Mobile app (Expo/RN)    │
+   │   public, no account     │              │  login · offline-first   │
+   └───────────┬─────────────┘              └───────────┬─────────────┘
+       write-only, via              pull sync (server-wins) → SQLite,
+       SECURITY DEFINER RPC                 read via tenant-scoped RLS
+               │                                        │
+               ▼                                        ▼
+   ┌──────────────────────────────────────────────────────────────────┐
+   │                            Supabase                               │
+   │   Postgres + RLS  ·  Auth  ·  Storage (private buckets)           │
+   │   Edge Function: request-upload-url (service role, path-safe)     │
+   └──────────────────────────────────────────────────────────────────┘
+                               ▲
+                shared domain contract (one source of truth)
+                ┌──────────────┴───────────────┐
+                │ packages/core     (Zod schemas, rules, constants) │
+                │ packages/supabase (generated DB types + client)   │
+                └───────────────────────────────────────────────────┘
+```
+
+### Security & privacy model (the crown jewel)
+
+Every design choice here answers a specific threat, and the enforcement lives **in the database**, so a bug in the client can't widen access:
+
+- **Public form writes, but never reads.** There is no anon `SELECT` policy on `trips` or `travelers`. Submission goes through a `SECURITY DEFINER` RPC (`submit_traveler`) that validates the trip code and inserts the traveler + guardians + health record + consent + documents **atomically in one transaction**. To render the landing screen, a separate `get_trip_public` RPC returns **only the trip name** — never `organization_id` or `trip_id`, which the public form must not learn.
+- **Uploads never trust the client.** The anon form has no Storage `INSERT` policy. Instead, the `request-upload-url` Edge Function runs with the service role, resolves the trip from the code server-side, **builds the object path itself** (client paths are ignored), sanitizes the filename, enforces per-kind MIME allowlists and a size cap, and returns a signed token scoped to exactly one object.
+- **Multi-tenant isolation via RLS.** Every table is RLS-on from birth with explicit policies. RLS helper predicates (`is_trip_member`, `is_trip_admin`, `is_org_member`) are `SECURITY DEFINER` and granted narrowly to `authenticated`/`service_role`. A leader can only reach the trips they belong to; data never crosses organizations.
+- **Consent is a precondition, not a checkbox.** Health data and minors' data cannot be persisted without a recorded LGPD consent — enforced inside the submission RPC.
+- **Sensitive data is never logged.** A hard project invariant forbids sending health data, documents, or minors' personal data to logs, analytics, or crash reporting.
+- **Defense in depth on validation.** Client-side checks are treated as *UX only*; the trusted gate (MIME, size, allowlists) is duplicated server-side in the Edge Function, with a pointer back to the `packages/core` source of truth.
+
+### Shared domain contract
+
+The traveler domain — personal data, health, documents, consent, guardian — is modeled **once** in `packages/core` as Zod schemas, then reused across surfaces:
+
+- **Business rules live where they belong.** `isMinor(birthDate, reference)` is kept in code (not the DB) precisely because it depends on a non-immutable reference date; it returns `false` for an unknown birth date and lets the form infer minority from the presence of a guardian instead. Rules like this ship with unit tests.
+- **Types flow from the database.** `packages/supabase` holds the generated `Database` types; after any migration the types are regenerated so the client, the RPC payloads, and the Zod contract stay aligned.
 
 ---
 
-## 6. Setup
+## The engineering harness
+
+> This is the part most relevant to an **AI Product Engineer** role.
+
+The repo doesn't just *use* an AI coding agent — it **governs** one. [`CLAUDE.md`](./CLAUDE.md) is a project constitution: a set of inviolable rules the agent must obey on every task, independent of the feature being built. It turns an open-ended assistant into a bounded, auditable contributor.
+
+**Codified invariants (a sample):**
+- Database is **English, `snake_case`, plural tables** — no exceptions.
+- **Secrets only in `.env`**; the service-role key is server-side only and never reaches the client/app.
+- **Schema changes only via versioned migrations** in `supabase/migrations/`; regenerate types + review RLS afterward.
+- **RLS always on**; no table is ever exposed without an explicit policy.
+- **Consent-before-persistence** and **never-log-sensitive-data** as first-class rules.
+- **One domain contract** in `packages/core`; no duplicated validation between web and mobile.
+
+**A machine-checkable definition of done.** Nothing is "done" until, in the affected package:
 
 ```bash
-# 1. Instalar dependências de todo o workspace
+pnpm typecheck   # tsc --noEmit across the workspace
+pnpm lint        # eslint / next lint
+pnpm test        # Zod schemas, is_minor, guardian-required, sync logic
+```
+
+Deterministic logic (schemas, parsing, business rules like `is_minor` and guardian obligation) is covered by tests, so the harness — not vibes — decides whether a change is acceptable. Migrations follow a fixed loop: **write migration → regenerate types → review RLS on the new tables → only then move on.**
+
+The result is a workflow where AI velocity is real but every change is fenced by invariants a reviewer (or the next agent) can rely on. **That governance layer — not just the feature code — is the portfolio artifact.**
+
+---
+
+## Tech stack
+
+- **Monorepo:** Turborepo + pnpm workspaces (`pnpm` only)
+- **Web:** Next.js (App Router) + TypeScript, React Hook Form + Zod
+- **Mobile:** Expo + EAS, React Native, expo-router, SQLite (expo-sqlite / op-sqlite) — *scaffolded*
+- **Backend:** Supabase — Postgres (RLS), Auth, Storage, Edge Functions (Deno)
+- **Domain/validation:** Zod in `packages/core` (single source of truth)
+- **Distribution:** EAS Build → TestFlight (iOS) + Firebase App Distribution (Android)
+
+## Repository layout
+
+```
+trip-health-forms/
+├── apps/
+│   ├── web/          # Next.js — public traveler intake form  (built)
+│   └── mobile/       # Expo — leaders' offline app            (scaffolded)
+├── packages/
+│   ├── core/         # shared domain: Zod schemas, rules, constants  (+ tests)
+│   ├── supabase/     # generated DB types + browser client
+│   ├── ui/           # shared design tokens (planned)
+│   └── config/       # shared tsconfig / eslint (planned)
+├── supabase/
+│   ├── migrations/   # 16 versioned migrations: schema, RLS, RPCs, storage
+│   └── functions/    # request-upload-url (Deno Edge Function)
+├── CLAUDE.md         # the engineering harness / project constitution
+├── turbo.json · pnpm-workspace.yaml
+```
+
+## Local development
+
+```bash
 pnpm install
 
-# 2. Configurar variáveis de ambiente (copie e preencha)
-cp apps/web/.env.example apps/web/.env
-cp apps/mobile/.env.example apps/mobile/.env
+# Web form (runs with just NEXT_PUBLIC_PREVIEW=true, no backend needed)
+cp apps/web/.env.example apps/web/.env.local   # fill in Supabase URL + anon key
+pnpm --filter web dev
 
-# 3. Banco de dados (a partir da Fase 1)
-supabase start          # ambiente local
-supabase db reset       # aplica migrations + seed
+# Full stack, all surfaces
+pnpm dev
 ```
 
-> As migrations e o schema ainda **não** estão definidos — ver Fase 1 no roadmap.
+Environment variables are never committed — only `.env.example` files are tracked. `NEXT_PUBLIC_*` vars are inlined at build time and must be configured per environment (e.g. per Vercel scope).
+
+## Roadmap
+
+| Phase | Goal | Status |
+|---|---|---|
+| **0 — Foundation** | Monorepo scaffold, Supabase project, CI, EAS/Firebase | ✅ |
+| **1 — Data model** | Schema, migrations, RLS, RPCs, generated types | ✅ |
+| **2 — Web form** | Multi-step wizard, uploads, health block, consent, guardian | ✅ |
+| **3 — App (online)** | Login, trip list, traveler list & detail | ⏳ |
+| **4 — Offline** | SQLite schema, pull-based sync engine, file cache | ⏳ |
+| **5 — Distribution** | EAS builds → TestFlight + Firebase App Distribution | ⏳ |
+| **6 — Hardening** | LGPD/security review, retention & deletion policy | ⏳ |
 
 ---
 
-## 7. Rodando
+## License
 
-```bash
-pnpm dev                        # roda todas as tarefas dev (turbo)
-
-pnpm --filter web dev           # apenas o formulário web (Next.js)
-pnpm --filter mobile start      # apenas o app (Expo)
-```
-
----
-
-## 8. Build & distribuição
-
-O app mobile é buildado com **EAS Build** e distribuído nas plataformas de teste:
-
-```bash
-# iOS → TestFlight
-eas build --platform ios --profile preview
-eas submit --platform ios
-
-# Android → Firebase App Distribution
-eas build --platform android --profile preview
-# (upload do artefato para o Firebase App Distribution via CLI/console)
-```
-
-Os perfis de build ficam em `apps/mobile/eas.json` (criado na Fase 5).
-
----
-
-## 9. Modelo de dados & LGPD
-
-> **O schema ainda não está definido** — a modelagem detalhada (tabelas, colunas, tipos, relações,
-> migrations e RLS) será feita na **Fase 1**.
-
-**Convenção obrigatória:** todas as **tabelas e colunas do Supabase em inglês**, `snake_case`,
-tabelas no plural (ex.: `travelers`, `health_records`). Isso mantém o banco alinhado aos tipos
-gerados em `packages/supabase` e ao contrato de domínio em `packages/core`.
-
-**Entidades conceituais** (alto nível, sem colunas nesta fase): organizações (tenant),
-líderes/membros, viagens, viajantes, responsáveis (menores), dados de saúde, documentos e
-consentimentos.
-
-**Diretrizes de acesso e privacidade:**
-- Multi-tenant com **RLS por organização**; cada líder só enxerga as viagens que lidera.
-- **Formulário público:** escrita via link com código da viagem (insert restrito, sem leitura
-  pública). Storage em buckets privados; leitura apenas autenticada.
-- **Dados sensíveis** (saúde) e de **menores** (autorização do responsável) têm consentimento
-  LGPD registrado; política de retenção/exclusão definida na Fase 6.
-
----
-
-## 10. Roadmap por fases
-
-| Fase | Objetivo |
-|------|----------|
-| **0 — Fundação** | Scaffold do monorepo, projeto Supabase, `.env.example`, CI, EAS/Firebase. |
-| **1 — Modelo de dados** | Definição do schema (tabelas/colunas **em inglês**), migrations, RLS, seed e tipos gerados em `packages/supabase`. |
-| **2 — Formulário web** | Multi-etapas, upload de documentos, bloco de saúde, consentimento LGPD e responsável do menor. |
-| **3 — App (online)** | Login, lista de viagens, lista e detalhe do viajante. |
-| **4 — Offline** | Schema SQLite, motor de sync (pull) e cache de arquivos. |
-| **5 — Distribuição** | Builds EAS → TestFlight + Firebase App Distribution. |
-| **6 — Hardening** | Revisão LGPD/segurança, testes, política de retenção/exclusão de dados. |
-
----
-
-## Licença
-
-Uso interno / privado. Defina a licença conforme a política da organização.
+Private / portfolio use. The repository contains **no real personal data** — all sensitive records live only in the database, never in source control.
