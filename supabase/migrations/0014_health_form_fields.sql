@@ -46,9 +46,10 @@ alter table public.health_records
 --     "medical_conditions": [ "asthma", "diabetes", ... ],        -- page 2 checklist
 --     "allergy": { "type": "food|medication|insect|other", "reaction": "...", "seafood": "..." },
 --     "medications_to_carry": "...",                              -- free text
---     "medical_history": {                                        -- page 2 yes/no grid
+--     "medical_history": {                                        -- page 2 multi-select checklist
 --       "seizure": bool, "fainting": bool, "asthma_attack": bool,
---       "severe_allergic_reaction": bool, "surgery_hospitalization_12m": bool, "other": bool
+--       "severe_allergic_reaction": bool, "surgery_hospitalization_12m": bool, "other": bool,
+--       "none": bool                                              -- "não apresentei nenhuma situação"
 --     },
 --     "medical_history_notes": "...",
 --     "travel_health_history": [ "motion_sickness", "heat_sensitivity", ... ],

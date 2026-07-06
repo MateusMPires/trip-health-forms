@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { UploadCloud, Check, X } from 'lucide-react';
 import type { DocumentInput, DocumentKind } from '@viagem/core';
 import { cn } from '@/lib/cn';
 import { ALLOWED_MIME_TYPES } from '@/lib/config';
@@ -29,6 +30,7 @@ export function FileUploadField({
   form,
   kind,
   label,
+  number,
   hint,
   maxFiles = 1,
   required = false,
@@ -37,6 +39,7 @@ export function FileUploadField({
   form: TravelerForm;
   kind: DocumentKind;
   label: string;
+  number?: number;
   hint?: string;
   maxFiles?: number;
   required?: boolean;
@@ -88,18 +91,25 @@ export function FileUploadField({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm font-medium text-foreground">
-          {label}
-          {required && <span className="ml-0.5 text-danger">*</span>}
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="flex gap-2 text-sm font-medium text-foreground">
+          {number != null && (
+            <span className="mt-px w-6 shrink-0 font-mono text-xs tabular-nums text-muted" aria-hidden>
+              {String(number).padStart(2, '0')}
+            </span>
+          )}
+          <span>
+            {label}
+            {required && <span className="ml-0.5 text-danger">*</span>}
+          </span>
         </span>
         {maxFiles > 1 && (
-          <span className="text-xs text-muted">
+          <span className="shrink-0 text-xs text-muted">
             {mine.length}/{maxFiles}
           </span>
         )}
       </div>
-      {hint && <p className="-mt-1 text-xs text-muted">{hint}</p>}
+      {hint && <p className={cn('-mt-1 text-xs text-muted', number != null && 'pl-8')}>{hint}</p>}
 
       {!atLimit && (
         <button
@@ -118,19 +128,11 @@ export function FileUploadField({
           className={cn(
             'flex flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed px-4 py-7 text-center transition-all',
             dragging
-              ? 'border-primary bg-primary-soft'
-              : 'border-border-strong bg-surface hover:border-primary hover:bg-primary-soft/40',
+              ? 'border-accent bg-surface-muted'
+              : 'border-border-strong bg-surface hover:border-accent hover:bg-surface-muted/60',
           )}
         >
-          <svg viewBox="0 0 24 24" fill="none" className="size-6 text-primary" aria-hidden>
-            <path
-              d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <UploadCloud className="size-6 text-muted" aria-hidden strokeWidth={1.75} />
           <span className="text-sm font-semibold text-foreground">Adicionar arquivo</span>
           <span className="text-xs text-muted">Toque para escolher ou arraste aqui · máx. 10 MB</span>
         </button>
@@ -167,7 +169,7 @@ export function FileUploadField({
                 className="rounded-lg p-1.5 text-muted transition-colors hover:bg-danger-soft hover:text-danger"
                 aria-label="Remover arquivo"
               >
-                <XIcon />
+                <X className="size-4" aria-hidden strokeWidth={2} />
               </button>
             </motion.li>
           ))}
@@ -196,7 +198,7 @@ export function FileUploadField({
                   className="rounded-lg p-1.5 text-muted hover:text-danger"
                   aria-label="Descartar"
                 >
-                  <XIcon />
+                  <X className="size-4" aria-hidden strokeWidth={2} />
                 </button>
               )}
             </motion.li>
@@ -218,27 +220,21 @@ function FileBadge({ ok, error = false }: { ok: boolean; error?: boolean }) {
     <span
       className={cn(
         'flex size-9 shrink-0 items-center justify-center rounded-lg',
-        error ? 'bg-danger/10 text-danger' : ok ? 'bg-primary-soft text-primary' : 'bg-surface-muted text-muted',
+        error
+          ? 'bg-danger/10 text-danger'
+          : ok
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-surface-muted text-muted',
       )}
       aria-hidden
     >
       {ok ? (
-        <svg viewBox="0 0 20 20" fill="none" className="size-4">
-          <path d="M4 10.5L8 14.5L16 5.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <Check className="size-4" strokeWidth={2.5} />
       ) : error ? (
-        <XIcon />
+        <X className="size-4" strokeWidth={2} />
       ) : (
         <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
       )}
     </span>
-  );
-}
-
-function XIcon() {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className="size-4" aria-hidden>
-      <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
   );
 }

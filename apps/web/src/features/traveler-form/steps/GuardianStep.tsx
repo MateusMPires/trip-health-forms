@@ -34,18 +34,15 @@ export function GuardianStep({ form }: { form: TravelerForm }) {
     }
   }, [minor, getValues, setValue]);
 
+  // Guardian fields only exist for minors, so the emergency phones shift from 1/2 to 4/5.
+  const phoneBase = minor ? 3 : 0;
+
   return (
-    <StepShell
-      title={minor ? 'Responsável & contatos de emergência' : 'Contatos de emergência'}
-      description={
-        minor
-          ? 'O adolescente é menor de 18 anos — informe o responsável legal e os contatos para emergências.'
-          : 'Informe dois telefones para contato em caso de emergência durante a viagem.'
-      }
-    >
+    <StepShell>
       {minor && (
         <>
           <Field
+            number={1}
             label="Nome do responsável"
             required
             error={typeof errors?.message === 'string' ? errors.message : errors?.[0]?.full_name?.message}
@@ -58,14 +55,14 @@ export function GuardianStep({ form }: { form: TravelerForm }) {
           </Field>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            <Field label="CPF do responsável" error={errors?.[0]?.document?.message}>
+            <Field number={2} label="CPF do responsável" required error={errors?.[0]?.document?.message}>
               <CpfInput
                 control={control}
                 name="guardians.0.document"
                 invalid={Boolean(errors?.[0]?.document)}
               />
             </Field>
-            <Field label="Parentesco">
+            <Field number={3} label="Parentesco">
               <TextInput
                 {...register('guardians.0.relationship', { setValueAs: emptyToNull })}
                 placeholder="Ex.: mãe, pai, tio(a)"
@@ -77,6 +74,7 @@ export function GuardianStep({ form }: { form: TravelerForm }) {
 
       <div className="grid gap-6 sm:grid-cols-2">
         <Field
+          number={phoneBase + 1}
           label="Telefone de emergência"
           required
           error={errors?.[0]?.phone?.message}
@@ -88,6 +86,7 @@ export function GuardianStep({ form }: { form: TravelerForm }) {
           />
         </Field>
         <Field
+          number={phoneBase + 2}
           label="Segundo telefone de emergência"
           required
           error={errors?.[0]?.phone_secondary?.message}

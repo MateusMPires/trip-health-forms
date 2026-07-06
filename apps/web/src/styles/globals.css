@@ -1,23 +1,30 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens — light mode only, light-turquoise accent ("azul turquesa claro").
+ * Design tokens — minimalist grayscale. Solid elements (buttons, active states,
+ * progress, selection) are near-black; turquoise lives ONLY as a hover/focus
+ * border accent (--color-accent), never as a fill.
  * Declared under @theme so Tailwind v4 generates the matching utilities
- * (bg-surface, text-foreground, border-border, bg-primary, ring-primary, ...).
+ * (bg-surface, text-foreground, border-border, bg-primary, border-accent, ring-accent, ...).
  */
 @theme {
-  --color-background: #f2fbfc;
+  --color-background: #fafafa;
   --color-surface: #ffffff;
-  --color-surface-muted: #edf7f9;
-  --color-foreground: #0e2a2f;
-  --color-muted: #5c7378;
-  --color-border: #d8e8eb;
-  --color-border-strong: #b9d6db;
+  --color-surface-muted: #f4f4f5;
+  --color-foreground: #171717;
+  --color-muted: #737373;
+  --color-border: #e5e5e5;
+  --color-border-strong: #d4d4d4;
 
-  --color-primary: #12b3c4;
-  --color-primary-hover: #0d95a4;
+  /* Fills — near-black (buttons, active YesNo, progress bar, selected states). */
+  --color-primary: #171717;
+  --color-primary-hover: #000000;
   --color-primary-foreground: #ffffff;
-  --color-primary-soft: #e0f6f9;
+  --color-primary-soft: #f4f4f5;
+
+  /* Accent — turquoise, restricted to hover borders and focus rings. */
+  --color-accent: #12b3c4;
+  --color-accent-soft: rgba(18, 179, 196, 0.14);
 
   --color-danger: #dc2626;
   --color-danger-soft: #fdecec;
@@ -27,10 +34,11 @@
   --radius-xl: 1.25rem;
   --radius-2xl: 1.5rem;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-mono-jetbrains), ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
 
-  --shadow-card: 0 1px 2px rgba(14, 42, 47, 0.04), 0 12px 32px -12px rgba(14, 42, 47, 0.12);
+  --shadow-card: 0 1px 2px rgba(23, 23, 23, 0.04), 0 10px 30px -14px rgba(23, 23, 23, 0.1);
 }
 
 :root {
@@ -50,13 +58,8 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* A soft turquoise aurora behind the form, purely decorative. */
 body {
   min-height: 100dvh;
-  background-image:
-    radial-gradient(60rem 60rem at 15% -10%, rgba(18, 179, 196, 0.1), transparent 55%),
-    radial-gradient(50rem 50rem at 110% 10%, rgba(18, 179, 196, 0.08), transparent 50%);
-  background-attachment: fixed;
 }
 
 @media (prefers-reduced-motion: reduce) {

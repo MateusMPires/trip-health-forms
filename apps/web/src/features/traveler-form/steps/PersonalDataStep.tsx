@@ -17,11 +17,13 @@ export function PersonalDataStep({ form }: { form: TravelerForm }) {
   const errors = formState.errors.traveler;
 
   return (
-    <StepShell
-      title="Dados pessoais"
-      description="Preencha uma ficha separada para cada adolescente ou missionário."
-    >
-      <Field label="Nome do adolescente / missionário" required error={errors?.full_name?.message}>
+    <StepShell>
+      <Field
+        number={1}
+        label="Nome do adolescente / missionário"
+        required
+        error={errors?.full_name?.message}
+      >
         <TextInput
           {...register('traveler.full_name')}
           placeholder="Nome completo"
@@ -31,7 +33,7 @@ export function PersonalDataStep({ form }: { form: TravelerForm }) {
       </Field>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <Field label="Data de nascimento" required error={errors?.birth_date?.message}>
+        <Field number={2} label="Data de nascimento" required error={errors?.birth_date?.message}>
           <TextInput
             type="date"
             {...register('traveler.birth_date')}
@@ -39,7 +41,7 @@ export function PersonalDataStep({ form }: { form: TravelerForm }) {
           />
         </Field>
 
-        <Field label="Sexo" required error={errors?.sex?.message}>
+        <Field number={3} label="Sexo" required error={errors?.sex?.message}>
           <Select
             {...register('traveler.sex')}
             defaultValue=""
@@ -55,15 +57,20 @@ export function PersonalDataStep({ form }: { form: TravelerForm }) {
         </Field>
       </div>
 
-      <Field label="CPF do adolescente / missionário" required error={errors?.document?.message}>
+      <Field
+        number={4}
+        label="CPF do adolescente / missionário"
+        required
+        error={errors?.document?.message}
+      >
         <CpfInput control={control} name="traveler.document" invalid={Boolean(errors?.document)} />
       </Field>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <Field label="Telefone" required error={errors?.phone?.message}>
+        <Field number={5} label="Telefone" required error={errors?.phone?.message}>
           <PhoneInput control={control} name="traveler.phone" invalid={Boolean(errors?.phone)} />
         </Field>
-        <Field label="E-mail" error={errors?.email?.message}>
+        <Field number={6} label="E-mail" error={errors?.email?.message}>
           <TextInput
             type="email"
             {...register('traveler.email', { setValueAs: emptyToNull })}
@@ -77,8 +84,10 @@ export function PersonalDataStep({ form }: { form: TravelerForm }) {
       <FileUploadField
         form={form}
         kind="identity_document"
-        label="Foto do documento de identidade"
-        hint="Envie uma foto legível do RG ou documento com foto. Imagem única, até 10 MB."
+        number={7}
+        label="Fotos do documento de identidade"
+        hint="Envie duas fotos legíveis: a frente e o verso do RG (ou documento com foto). Até 10 MB cada."
+        maxFiles={2}
         required
         error={formState.errors.documents?.message}
       />

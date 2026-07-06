@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { HeartPulse, AlertCircle } from 'lucide-react';
 import { getTripPublic } from '@/lib/trip';
 import { isPreview } from '@/lib/preview';
 import { Wizard } from './Wizard';
@@ -31,7 +32,7 @@ export function TravelerFormPage({ code }: { code: string }) {
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-8 sm:py-12">
       {isPreview() && (
-        <p className="rounded-xl border border-primary/30 bg-primary-soft px-4 py-2.5 text-center text-xs font-medium text-primary">
+        <p className="rounded-xl border border-border bg-surface-muted px-4 py-2.5 text-center text-xs font-medium text-muted">
           Modo preview — nenhum dado é enviado ao servidor.
         </p>
       )}
@@ -58,19 +59,26 @@ export function TravelerFormPage({ code }: { code: string }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-4"
           >
-            <span className="w-fit rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-              Ficha de saúde
-            </span>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              {state.tripName}
-            </h1>
-            <p className="text-sm leading-relaxed text-muted">
-              Preencha os dados do viajante para garantir a segurança e o bem-estar durante a viagem.
-              As informações são confidenciais e usadas apenas pela equipe e pela enfermeira do grupo.
-              Preencha uma ficha para cada adolescente ou missionário.
-            </p>
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface text-foreground">
+                <HeartPulse className="size-[18px]" aria-hidden strokeWidth={1.75} />
+              </span>
+              <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
+                Ficha de saúde do viajante
+              </span>
+            </div>
+            <div className="flex flex-col gap-2">
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-[2.125rem]">
+                {state.tripName}
+              </h1>
+              <p className="text-sm leading-relaxed text-muted">
+                Preencha os dados do viajante para garantir a segurança e o bem-estar durante a
+                viagem. As informações são confidenciais e usadas apenas pela equipe e pela
+                enfermeira do grupo. Preencha uma ficha para cada adolescente ou missionário.
+              </p>
+            </div>
           </motion.header>
 
           <Wizard code={code} tripName={state.tripName} />
@@ -83,7 +91,7 @@ export function TravelerFormPage({ code }: { code: string }) {
 function CenteredNote({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 py-20 text-center text-sm text-muted">
-      <span className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <span className="size-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
       {children}
     </div>
   );
@@ -91,7 +99,10 @@ function CenteredNote({ children }: { children: React.ReactNode }) {
 
 function StatusCard({ title, message }: { title: string; message: string }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-3xl border border-border bg-surface px-6 py-16 text-center shadow-[var(--shadow-card)]">
+    <div className="flex flex-col items-center gap-3 rounded-3xl border border-border bg-surface px-6 py-16 text-center shadow-[var(--shadow-card)]">
+      <span className="flex size-12 items-center justify-center rounded-full border border-border bg-surface-muted text-muted">
+        <AlertCircle className="size-6" aria-hidden strokeWidth={1.75} />
+      </span>
       <h1 className="text-xl font-semibold text-foreground">{title}</h1>
       <p className="max-w-sm text-sm leading-relaxed text-muted">{message}</p>
     </div>

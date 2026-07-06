@@ -49,6 +49,7 @@ export const MEDICAL_HISTORY_LABELS: Record<string, string> = {
   severe_allergic_reaction: 'Reação alérgica grave',
   surgery_hospitalization_12m: 'Cirurgia ou hospitalização nos últimos 12 meses',
   other: 'Outros',
+  none: 'Não apresentei nenhuma das situações descritas',
 };
 
 export const TRAVEL_HEALTH_HISTORY_LABELS: Record<string, string> = {
@@ -60,6 +61,7 @@ export const TRAVEL_HEALTH_HISTORY_LABELS: Record<string, string> = {
   insect_animal_fear: 'Medo intenso de insetos e/ou animais',
   dehydration_heatstroke: 'Histórico de desidratação ou insolação',
   other: 'Outra',
+  none: 'Não possui histórico de nenhuma das situações descritas',
 };
 
 export const MED_CATEGORY_LABELS: Record<MedAuthorizationCategory, string> = {

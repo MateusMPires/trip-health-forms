@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { Check } from 'lucide-react';
 
 export function SuccessScreen({ tripName }: { tripName: string }) {
   return (
@@ -16,9 +17,7 @@ export function SuccessScreen({ tripName }: { tripName: string }) {
         transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 15 }}
         className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground"
       >
-        <svg viewBox="0 0 24 24" fill="none" className="size-8">
-          <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <Check className="size-8" aria-hidden strokeWidth={2.5} />
       </motion.span>
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">Ficha enviada!</h2>

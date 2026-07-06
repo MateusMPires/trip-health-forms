@@ -13,11 +13,9 @@ export function ConsentReviewStep({ form }: { form: TravelerForm }) {
   const { register, formState } = form;
 
   return (
-    <StepShell
-      title="Consentimento e revisão"
-      description="Confira o resumo, deixe qualquer observação para a equipe de saúde e confirme os consentimentos."
-    >
+    <StepShell>
       <Field
+        number={1}
         label="Existe alguma informação que a equipe de saúde deva conhecer para garantir a segurança do adolescente?"
       >
         <TextArea

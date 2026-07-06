@@ -19,11 +19,13 @@ export function HealthInsuranceStep({ form }: { form: TravelerForm }) {
   const insuranceErrors = errors?.data?.insurance;
 
   return (
-    <StepShell
-      title="Plano de saúde"
-      description="Se o adolescente possui plano de saúde, informe os dados da carteirinha."
-    >
-      <Field label="Possui plano de saúde?" required error={errors?.has_health_insurance?.message}>
+    <StepShell>
+      <Field
+        number={1}
+        label="Possui plano de saúde?"
+        required
+        error={errors?.has_health_insurance?.message}
+      >
         <YesNo
           value={hasInsurance ?? null}
           invalid={Boolean(errors?.has_health_insurance)}

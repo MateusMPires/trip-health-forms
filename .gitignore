@@ -11,6 +11,9 @@ out/
 .expo/
 web-build/
 
+# Vercel
+.vercel/
+
 # Ambiente / segredos
 .env
 .env.*
@@ -42,3 +45,5 @@ coverage/
 
 # Local Claude Code skills/tooling
 .claude/
+.vercel
+.env*

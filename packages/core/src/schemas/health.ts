@@ -25,6 +25,8 @@ export const healthDataSchema = z
       })
       .optional(),
     medications_to_carry: z.string().optional(),
+    // Multi-select checklist (not yes/no). `none` = "não apresentei nenhuma das situações",
+    // mutually exclusive with the others; at least one key must be true (superRefine below).
     medical_history: z
       .object({
         seizure: z.boolean(),
@@ -33,6 +35,7 @@ export const healthDataSchema = z
         severe_allergic_reaction: z.boolean(),
         surgery_hospitalization_12m: z.boolean(),
         other: z.boolean(),
+        none: z.boolean(),
       })
       .partial()
       .optional(),
@@ -147,6 +150,18 @@ export const healthInputSchema = z
       h.has_dietary_restriction === true && !h.dietary_restrictions?.trim(),
       ['dietary_restrictions'],
       'Descreva a restrição alimentar',
+    );
+    // Medical-history checklist: at least one option (a real situation or "none") is required.
+    require(
+      Object.values(h.data?.medical_history ?? {}).every((v) => v !== true),
+      ['data', 'medical_history'],
+      'Selecione ao menos uma opção',
+    );
+    // Travel-history checklist: at least one option (a real situation or "none") is required.
+    require(
+      (h.data?.travel_health_history?.length ?? 0) === 0,
+      ['data', 'travel_health_history'],
+      'Selecione ao menos uma opção',
     );
   });
 

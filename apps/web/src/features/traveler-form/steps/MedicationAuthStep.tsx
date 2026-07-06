@@ -23,11 +23,9 @@ export function MedicationAuthStep({ form }: { form: TravelerForm }) {
   const selfMed = consentValue(consents, 'self_medication');
 
   return (
-    <StepShell
-      title="Autorização de medicamentos"
-      description="Autorização para administração de medicamentos de uso eventual durante a viagem."
-    >
+    <StepShell>
       <Field
+        number={1}
         label="Autorizo a enfermeira responsável e/ou equipe designada a administrar medicamentos de uso eventual, respeitando as orientações do fabricante, faixa etária e avaliação clínica, caso necessário durante a viagem."
         required
       >
@@ -61,6 +59,7 @@ export function MedicationAuthStep({ form }: { form: TravelerForm }) {
       </AnimatePresence>
 
       <Field
+        number={2}
         label="Caso o adolescente utilize medicamentos de uso contínuo ou esteja em tratamento, você autoriza que ele seja responsável por tomar seus medicamentos nos horários corretos, conforme orientação médica?"
         hint="Caso não autorize, a equipe entrará em contato para definir a melhor forma de acompanhamento durante a viagem."
         required

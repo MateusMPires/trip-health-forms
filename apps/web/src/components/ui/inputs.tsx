@@ -1,15 +1,16 @@
 'use client';
 
 import { forwardRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 const BASE_FIELD =
   'w-full rounded-xl border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/70 ' +
   'transition-all duration-150 outline-none ' +
-  'focus:border-primary focus:ring-4 focus:ring-primary/15';
+  'focus:border-accent focus:ring-4 focus:ring-accent/15';
 
 function stateBorder(invalid?: boolean): string {
-  return invalid ? 'border-danger/60' : 'border-border hover:border-border-strong';
+  return invalid ? 'border-danger/60' : 'border-border hover:border-accent';
 }
 
 export const TextInput = forwardRef<
@@ -46,13 +47,19 @@ export const Select = forwardRef<
   React.SelectHTMLAttributes<HTMLSelectElement> & { invalid?: boolean }
 >(function Select({ className, invalid, children, ...props }, ref) {
   return (
-    <select
-      ref={ref}
-      aria-invalid={invalid}
-      className={cn(BASE_FIELD, 'appearance-none pr-10', stateBorder(invalid), className)}
-      {...props}
-    >
-      {children}
-    </select>
+    <div className="relative">
+      <select
+        ref={ref}
+        aria-invalid={invalid}
+        className={cn(BASE_FIELD, 'cursor-pointer appearance-none pr-10', stateBorder(invalid), className)}
+        {...props}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-muted"
+        aria-hidden
+      />
+    </div>
   );
 });

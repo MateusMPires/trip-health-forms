@@ -1,6 +1,7 @@
 'use client';
 
 import { useWatch } from 'react-hook-form';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { upsertConsent, consentValue } from '@/features/consent/consents';
 import type { TravelerForm } from '@/features/traveler-form/hooks/useTravelerForm';
@@ -32,8 +33,8 @@ function ConsentCard({
       onClick={onToggle}
       className={cn(
         'flex items-start gap-3 rounded-2xl border p-4 text-left text-sm leading-relaxed transition-all',
-        'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20',
-        checked ? 'border-primary bg-primary-soft' : 'border-border bg-surface hover:border-border-strong',
+        'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/20',
+        checked ? 'border-primary bg-primary-soft' : 'border-border bg-surface hover:border-accent',
       )}
     >
       <span
@@ -43,11 +44,7 @@ function ConsentCard({
         )}
         aria-hidden
       >
-        {checked && (
-          <svg viewBox="0 0 20 20" fill="none" className="size-3.5">
-            <path d="M5 10.5L8.5 14L15 6.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
+        {checked && <Check className="size-3.5" strokeWidth={2.5} />}
       </span>
       <span className="text-foreground">{text}</span>
     </button>

@@ -3,20 +3,11 @@
 import { motion } from 'motion/react';
 
 // Animated progress bar with a step counter. `current` is 1-based.
-export function ProgressBar({
-  current,
-  total,
-  sectionLabel,
-}: {
-  current: number;
-  total: number;
-  sectionLabel: string;
-}) {
+export function ProgressBar({ current, total }: { current: number; total: number }) {
   const pct = Math.round((current / total) * 100);
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold text-foreground">{sectionLabel}</span>
+      <div className="flex justify-end">
         <span className="text-xs font-medium text-muted">
           Etapa {current} de {total}
         </span>

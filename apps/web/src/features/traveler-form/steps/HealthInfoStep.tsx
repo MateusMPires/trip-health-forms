@@ -49,12 +49,10 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
       : '';
 
   return (
-    <StepShell
-      title="Informações de saúde"
-      description="Essas informações serão usadas apenas pela equipe e pela enfermeira que acompanha o grupo."
-    >
+    <StepShell>
       {/* Medical conditions */}
       <Field
+        number={1}
         label="Possui alguma doença ou condição médica?"
         required
         error={errors?.has_medical_conditions?.message}
@@ -85,7 +83,7 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
       </AnimatePresence>
 
       {/* Allergies */}
-      <Field label="Possui alguma alergia?" required error={errors?.has_allergies?.message}>
+      <Field number={2} label="Possui alguma alergia?" required error={errors?.has_allergies?.message}>
         <YesNo
           value={hasAllergies ?? null}
           invalid={Boolean(errors?.has_allergies)}
@@ -143,6 +141,7 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
 
       {/* Continuous medication */}
       <Field
+        number={3}
         label="Faz uso contínuo de medicamentos?"
         required
         error={errors?.uses_continuous_medication?.message}
@@ -178,6 +177,7 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
 
       {/* Medication to carry */}
       <Field
+        number={4}
         label="Necessita portar medicamentos durante a viagem?"
         required
         error={errors?.needs_medication_on_trip?.message}
@@ -207,6 +207,7 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
 
       {/* Physical limitation */}
       <Field
+        number={5}
         label="Possui alguma limitação física ou necessidade especial?"
         required
         error={errors?.has_physical_limitation?.message}
@@ -234,13 +235,14 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
         )}
       </AnimatePresence>
 
-      {/* Medical history grid */}
-      <FieldGroup legend="Já apresentou alguma das situações abaixo?">
+      {/* Medical history checklist */}
+      <FieldGroup number={6} legend="Já apresentou alguma das situações abaixo?">
         <MedicalHistoryGrid
           value={medicalHistory}
           onChange={(next) => setValue('health.data.medical_history', next, { shouldDirty: true })}
+          error={errors?.data?.medical_history?.message}
         />
-        <Field label="Caso tenha assinalado “Sim”, explique brevemente.">
+        <Field label="Caso tenha marcado alguma das opções acima, explique brevemente.">
           <TextArea
             {...register('health.data.medical_history_notes', { setValueAs: emptyToUndef })}
             placeholder="Sua resposta"
@@ -249,7 +251,11 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
       </FieldGroup>
 
       {/* Travel health history */}
-      <Field label="Assinale se o adolescente possui histórico de:">
+      <Field
+        number={7}
+        label="Assinale se o adolescente possui histórico de:"
+        error={errors?.data?.travel_health_history?.message}
+      >
         <ChecklistField
           options={TRAVEL_HEALTH_HISTORY.map((h) => ({
             value: h,
@@ -259,13 +265,17 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
           onChange={(next) =>
             setValue('health.data.travel_health_history', next, { shouldDirty: true })
           }
+          noneValue="none"
+          noneLabel="Não possui histórico de nenhuma das situações descritas"
         />
       </Field>
 
       {/* Dietary restriction */}
       <Field
+        number={8}
         label="Possui alguma restrição alimentar?"
         required
+        hint="A viagem é para uma região litorânea, onde é comum servir pratos com frutos do mar. Fique atento a alergias ou restrições a alimentos típicos da região, como camarão, caranguejo (ou siri), lula, mariscos e peixes."
         error={errors?.has_dietary_restriction?.message}
       >
         <YesNo
@@ -280,7 +290,7 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
             <Field label="Qual restrição alimentar?" error={errors?.dietary_restrictions?.message}>
               <TextInput
                 {...register('health.dietary_restrictions', { setValueAs: emptyToNull })}
-                placeholder="Ex.: sem lactose, vegetariano…"
+                placeholder="Ex.: alergia a frutos do mar, sem lactose, vegetariano…"
                 invalid={Boolean(errors?.dietary_restrictions)}
               />
             </Field>
@@ -289,7 +299,7 @@ export function HealthInfoStep({ form }: { form: TravelerForm }) {
       </AnimatePresence>
 
       {/* Blood type */}
-      <Field label="Tipo sanguíneo" required error={errors?.blood_type?.message}>
+      <Field number={9} label="Tipo sanguíneo" required error={errors?.blood_type?.message}>
         <Select
           {...register('health.blood_type')}
           defaultValue=""

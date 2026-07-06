@@ -2,6 +2,11 @@
 // here — nothing hardcoded in the middle of the code.
 import type { DocumentKind } from '@viagem/core';
 
+// Trip served at the site root (`/`) when no code is present in the URL. This is the access_code
+// of "Viagem Missionária Guaiú 2026" (org Kombo Alpha) — the form points at it so travelers never
+// have to enter a code. The /viagem/[codigo] route still works for any other trip.
+export const DEFAULT_TRIP_CODE = '389933';
+
 // Version stamp recorded on every consent row. Bump when the LGPD / medical-care text changes,
 // so we can tell which wording a guardian actually accepted.
 export const TERMS_VERSION = '2026-07-01';

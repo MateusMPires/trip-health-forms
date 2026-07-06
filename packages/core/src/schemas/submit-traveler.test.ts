@@ -147,4 +147,39 @@ describe('submitTravelerPayloadSchema', () => {
     const result = submitTravelerPayloadSchema.safeParse(payload);
     expect(result.success).toBe(true);
   });
+
+  it("rejects a minor whose responsible guardian has no CPF", () => {
+    const payload = validMinorPayload();
+    payload.guardians[0]!.document = '';
+    const result = submitTravelerPayloadSchema.safeParse(payload);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty medical-history checklist (no option selected)', () => {
+    const payload = validMinorPayload();
+    payload.health.data.medical_history = {} as never;
+    const result = submitTravelerPayloadSchema.safeParse(payload);
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a medical-history checklist with only "none" selected', () => {
+    const payload = validMinorPayload();
+    payload.health.data.medical_history = { none: true } as never;
+    const result = submitTravelerPayloadSchema.safeParse(payload);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an empty travel-history checklist (no option selected)', () => {
+    const payload = validMinorPayload();
+    payload.health.data.travel_health_history = [];
+    const result = submitTravelerPayloadSchema.safeParse(payload);
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a travel-history checklist with only "none" selected', () => {
+    const payload = validMinorPayload();
+    payload.health.data.travel_health_history = ['none'];
+    const result = submitTravelerPayloadSchema.safeParse(payload);
+    expect(result.success).toBe(true);
+  });
 });

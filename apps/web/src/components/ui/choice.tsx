@@ -1,5 +1,6 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 // A selectable option rendered as a card. Works for both single (radio) and multi (checkbox)
@@ -26,10 +27,10 @@ export function OptionCard({
       onClick={onToggle}
       className={cn(
         'flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-all duration-150',
-        'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20',
+        'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/20',
         selected
           ? 'border-primary bg-primary-soft text-foreground'
-          : 'border-border bg-surface text-foreground hover:border-border-strong',
+          : 'border-border bg-surface text-foreground hover:border-accent',
         disabled && 'cursor-not-allowed opacity-50',
       )}
     >
@@ -41,17 +42,7 @@ export function OptionCard({
         )}
         aria-hidden
       >
-        {selected && (
-          <svg viewBox="0 0 20 20" fill="none" className="size-3.5">
-            <path
-              d="M5 10.5L8.5 14L15 6.5"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {selected && <Check className="size-3.5" strokeWidth={2.5} />}
       </span>
       <span className="font-medium">{label}</span>
     </button>
@@ -79,8 +70,8 @@ export function YesNo({
   return (
     <div
       className={cn(
-        'grid grid-cols-2 gap-2 rounded-2xl border p-1',
-        invalid ? 'border-danger/50' : 'border-border',
+        'grid grid-cols-2 gap-2 rounded-2xl border p-1 transition-colors',
+        invalid ? 'border-danger/50' : 'border-border hover:border-accent',
       )}
       role="radiogroup"
     >
@@ -95,9 +86,9 @@ export function YesNo({
             onClick={() => onChange(opt.val)}
             className={cn(
               'rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200',
-              'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20',
+              'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/20',
               active
-                ? 'bg-primary text-primary-foreground shadow-[0_6px_16px_-8px_rgba(18,179,196,0.8)]'
+                ? 'bg-primary text-primary-foreground shadow-[0_6px_16px_-10px_rgba(23,23,23,0.6)]'
                 : 'text-muted hover:text-foreground',
             )}
           >
