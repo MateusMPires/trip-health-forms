@@ -573,7 +573,13 @@ export type Database = {
         | "medical_care"
         | "medication_administration"
         | "self_medication"
-      document_kind: "identity_document" | "authorization" | "photo" | "other"
+      document_kind:
+        | "identity_document"
+        | "authorization"
+        | "photo"
+        | "commitment_term"
+        | "national_travel_authorization"
+        | "other"
       member_role: "collaborator" | "administrator"
       traveler_sex: "male" | "female" | "other" | "prefer_not_say"
       trip_status: "draft" | "active" | "archived"
@@ -710,7 +716,14 @@ export const Constants = {
         "medication_administration",
         "self_medication",
       ],
-      document_kind: ["identity_document", "authorization", "photo", "other"],
+      document_kind: [
+        "identity_document",
+        "authorization",
+        "photo",
+        "commitment_term",
+        "national_travel_authorization",
+        "other",
+      ],
       member_role: ["collaborator", "administrator"],
       traveler_sex: ["male", "female", "other", "prefer_not_say"],
       trip_status: ["draft", "active", "archived"],

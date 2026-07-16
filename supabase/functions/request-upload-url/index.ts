@@ -13,7 +13,14 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 // Mirror of DOCUMENT_KINDS in packages/core/src/constants/enums.ts (frozen by the DB
 // `document_kind` enum). Kept inline because Deno can't resolve the workspace package.
-const DOCUMENT_KINDS = ['identity_document', 'authorization', 'photo', 'other'] as const;
+const DOCUMENT_KINDS = [
+  'identity_document',
+  'authorization',
+  'photo',
+  'commitment_term',
+  'national_travel_authorization',
+  'other',
+] as const;
 type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 
 // Trusted server-side gate. Mirrors apps/web/src/lib/config.ts (the client checks are UX only).
@@ -22,6 +29,9 @@ const ALLOWED_MIME_TYPES: Record<DocumentKind, readonly string[]> = {
   identity_document: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
   photo: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
   authorization: ['application/pdf'],
+  // Admin-app uploads (never issued by the public form): photos of signed paper documents.
+  commitment_term: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
+  national_travel_authorization: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
   other: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
 };
 

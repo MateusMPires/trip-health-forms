@@ -6,6 +6,10 @@
 // Age at/above which a traveler is not a minor (drives is_minor + guardian requirement).
 export const MINOR_AGE_THRESHOLD = 18;
 
+// Age below which a traveler needs a national travel authorization document
+// (Autorização de Viagem Nacional). Drives requiresNationalTravelAuthorization.
+export const NATIONAL_TRAVEL_AUTH_MAX_AGE = 16;
+
 // Blood type options for the required select. `unknown` is the "Não sei" answer — stored
 // verbatim in health_records.blood_type (a text column), so no DB enum is needed.
 // Minimum length for the (alphanumeric) health-insurance card number.

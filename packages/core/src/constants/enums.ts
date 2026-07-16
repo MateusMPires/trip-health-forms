@@ -7,7 +7,16 @@ export type TravelerSex = (typeof TRAVELER_SEX)[number];
 // guardian). Shared so both the "responsible guardian" rule and the CPF validation know it.
 export const GUARDIAN_ABSENT_SENTINEL = 'xx';
 
-export const DOCUMENT_KINDS = ['identity_document', 'authorization', 'photo', 'other'] as const;
+// `commitment_term` and `national_travel_authorization` are uploaded by trip admins from the
+// mobile app (migration 0017); the public form never issues them.
+export const DOCUMENT_KINDS = [
+  'identity_document',
+  'authorization',
+  'photo',
+  'commitment_term',
+  'national_travel_authorization',
+  'other',
+] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 
 export const MEMBER_ROLES = ['collaborator', 'administrator'] as const;

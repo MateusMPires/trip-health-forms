@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "Viagem Missionária",
+    "slug": "viagem-missionaria",
+    "version": "0.1.0",
+    "scheme": "viagemmissionaria",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f6ba92c9-e9d0-438e-a2fb-25c0aaaaded1"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.viagemmissionaria.leaders",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.viagemmissionaria.leaders",
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app acessa suas fotos para anexar documentos ao viajante.",
+          "cameraPermission": "O app acessa a câmera para fotografar documentos do viajante."
+        }
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f6ba92c9-e9d0-438e-a2fb-25c0aaaaded1"
+      }
+    },
+    "owner": "mateus.piresss"
+  }
+}

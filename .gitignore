@@ -23,6 +23,9 @@ web-build/
 supabase/.branches/
 supabase/.temp/
 
+# Lista de e-mails dos líderes (dado operacional; não versionar)
+scripts/leaders.txt
+
 # Mobile / nativo
 *.keystore
 *.p8

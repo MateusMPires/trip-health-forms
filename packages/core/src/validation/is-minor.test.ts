@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isMinor } from './is-minor';
+import { isMinor, requiresNationalTravelAuthorization } from './is-minor';
 
 const reference = new Date('2026-07-03T00:00:00');
 
@@ -28,5 +28,29 @@ describe('isMinor', () => {
 
   it('is false for an invalid date string', () => {
     expect(isMinor('not-a-date', reference)).toBe(false);
+  });
+});
+
+describe('requiresNationalTravelAuthorization', () => {
+  it('is true for a traveler clearly under 16', () => {
+    expect(requiresNationalTravelAuthorization('2012-05-01', reference)).toBe(true);
+  });
+
+  it('is false exactly on the 16th birthday', () => {
+    expect(requiresNationalTravelAuthorization('2010-07-03', reference)).toBe(false);
+  });
+
+  it('is true the day before the 16th birthday', () => {
+    expect(requiresNationalTravelAuthorization('2010-07-04', reference)).toBe(true);
+  });
+
+  it('is false for a traveler well over 16', () => {
+    expect(requiresNationalTravelAuthorization('2000-01-01', reference)).toBe(false);
+  });
+
+  it('is false when the birth date is unknown or invalid', () => {
+    expect(requiresNationalTravelAuthorization(null, reference)).toBe(false);
+    expect(requiresNationalTravelAuthorization('', reference)).toBe(false);
+    expect(requiresNationalTravelAuthorization('not-a-date', reference)).toBe(false);
   });
 });
