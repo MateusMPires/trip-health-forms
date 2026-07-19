@@ -2,18 +2,18 @@
 // (typed anchor columns + the structured health_records.data payload, validated
 // through @viagem/core — the shared contract, never re-defined here) grouped into
 // small thematic sections.
-import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   healthDataSchema,
   MED_AUTHORIZATION_OPTIONS,
   type HealthData,
   type MedAuthorizationCategory,
 } from '@viagem/core';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { CardRow, GroupedCard, SectionTitle } from '@/components/GroupedCard';
 import { EmptyState } from '@/components/EmptyState';
+import { SheetHeader } from '@/components/SheetHeader';
 import { getHealthRecord, getTraveler } from '@/db/daos';
 import { toBool } from '@/db/types';
 import { useMirrorQuery } from '@/features/sync/SyncProvider';
@@ -57,37 +57,6 @@ function listLines(labels: string[]): string {
   return labels.length > 0 ? labels.join('\n') : '—';
 }
 
-function SheetHeader({ subtitle }: { subtitle: string }) {
-  const theme = useTheme();
-  return (
-    <View style={styles.headerRow}>
-      <View style={styles.headerText}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Ficha de saúde</Text>
-        {subtitle ? (
-          <Text
-            style={[styles.headerSubtitle, { color: theme.colors.secondaryText }]}
-            numberOfLines={1}
-          >
-            {subtitle}
-          </Text>
-        ) : null}
-      </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Fechar"
-        hitSlop={8}
-        style={({ pressed }) => [
-          styles.closeButton,
-          { backgroundColor: theme.colors.input, opacity: pressed ? 0.5 : 1 },
-        ]}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="close" size={18} color={theme.colors.secondaryText} />
-      </Pressable>
-    </View>
-  );
-}
-
 export function HealthSheetScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
@@ -100,7 +69,7 @@ export function HealthSheetScreen() {
   if (!record) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.groupedBackground }]}>
-        <SheetHeader subtitle={travelerName} />
+        <SheetHeader title="Ficha de saúde" subtitle={travelerName} />
         <EmptyState
           icon="medkit-outline"
           title="Ficha não enviada"
@@ -142,7 +111,7 @@ export function HealthSheetScreen() {
       contentContainerStyle={styles.content}
       nestedScrollEnabled
     >
-      <SheetHeader subtitle={travelerName} />
+      <SheetHeader title="Ficha de saúde" subtitle={travelerName} />
 
       <SectionTitle>Visão geral</SectionTitle>
       <GroupedCard>
@@ -237,29 +206,5 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     paddingBottom: 48,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    gap: 12,
-  },
-  headerText: {
-    flex: 1,
-    gap: 2,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  headerSubtitle: {
-    fontSize: 15,
-  },
-  closeButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

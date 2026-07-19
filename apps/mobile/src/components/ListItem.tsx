@@ -1,7 +1,7 @@
 // Plain-list row in the Contacts style: optional avatar, title, hairline separator
 // aligned with the text (not the avatar).
 import { type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, type TextStyle, View } from 'react-native';
 
 import { useTheme } from '@/theme';
 
@@ -13,9 +13,19 @@ type Props = {
   trailing?: ReactNode;
   onPress?: () => void;
   isLast?: boolean;
+  /** Overrides on the title (e.g. weight for emphasis, muted color). */
+  titleStyle?: StyleProp<TextStyle>;
 };
 
-export function ListItem({ title, subtitle, leading, trailing, onPress, isLast }: Props) {
+export function ListItem({
+  title,
+  subtitle,
+  leading,
+  trailing,
+  onPress,
+  isLast,
+  titleStyle,
+}: Props) {
   const theme = useTheme();
   return (
     <Pressable onPress={onPress} disabled={!onPress}>
@@ -37,7 +47,10 @@ export function ListItem({ title, subtitle, leading, trailing, onPress, isLast }
             ]}
           >
             <View style={styles.text}>
-              <Text style={[styles.title, { color: theme.colors.text }]} numberOfLines={1}>
+              <Text
+                style={[styles.title, { color: theme.colors.text }, titleStyle]}
+                numberOfLines={1}
+              >
                 {title}
               </Text>
               {subtitle ? (

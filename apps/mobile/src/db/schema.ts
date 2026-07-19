@@ -111,6 +111,23 @@ export const MIRROR_COLUMNS: Record<SyncTable, readonly string[]> = {
     'updated_at',
     'deleted_at',
   ],
+  evangelism_reports: [
+    'id',
+    'organization_id',
+    'trip_id',
+    'author_id',
+    'report_date',
+    'approaches',
+    'gospel_presentations',
+    'professions_of_faith',
+    'reconciliations',
+    'referrals',
+    'prayer_requests',
+    'notes',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+  ],
 };
 
 // Versioned local migrations, applied via PRAGMA user_version. Append-only: never
@@ -249,5 +266,29 @@ export const LOCAL_MIGRATIONS: readonly string[] = [
   CREATE INDEX idx_trip_members_trip ON trip_members (trip_id);
 
   ALTER TABLE documents ADD COLUMN pending_upload INTEGER NOT NULL DEFAULT 0;
+  `,
+  // Migration 3: evangelism_reports mirror + a local-only pending_sync flag (offline
+  // write-back outbox for reports filed by a group leader; survives sync upserts).
+  `
+  CREATE TABLE evangelism_reports (
+    id TEXT PRIMARY KEY NOT NULL,
+    organization_id TEXT NOT NULL,
+    trip_id TEXT NOT NULL,
+    author_id TEXT NOT NULL,
+    report_date TEXT NOT NULL,
+    approaches INTEGER NOT NULL DEFAULT 0,
+    gospel_presentations INTEGER NOT NULL DEFAULT 0,
+    professions_of_faith INTEGER NOT NULL DEFAULT 0,
+    reconciliations INTEGER NOT NULL DEFAULT 0,
+    referrals INTEGER NOT NULL DEFAULT 0,
+    prayer_requests INTEGER NOT NULL DEFAULT 0,
+    notes TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    -- Local-only outbox flag (never overwritten by sync):
+    pending_sync INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE INDEX idx_evangelism_reports_trip ON evangelism_reports (trip_id);
   `,
 ];

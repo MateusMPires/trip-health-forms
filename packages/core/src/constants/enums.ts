@@ -19,7 +19,9 @@ export const DOCUMENT_KINDS = [
 ] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 
-export const MEMBER_ROLES = ['collaborator', 'administrator'] as const;
+// `group_leader` (migration 0018) is a collaborator that can additionally file and
+// edit evangelism reports; one role per membership.
+export const MEMBER_ROLES = ['collaborator', 'administrator', 'group_leader'] as const;
 export type MemberRole = (typeof MEMBER_ROLES)[number];
 
 export const TRIP_STATUSES = ['draft', 'active', 'archived'] as const;

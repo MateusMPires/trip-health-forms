@@ -34,6 +34,7 @@ export const SYNC_TABLES = [
   'health_records',
   'consents',
   'documents',
+  'evangelism_reports',
 ] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];
 

@@ -154,6 +154,82 @@ export type Database = {
           },
         ]
       }
+      evangelism_reports: {
+        Row: {
+          approaches: number
+          author_id: string
+          created_at: string
+          deleted_at: string | null
+          gospel_presentations: number
+          id: string
+          notes: string | null
+          organization_id: string
+          prayer_requests: number
+          professions_of_faith: number
+          reconciliations: number
+          referrals: number
+          report_date: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          approaches?: number
+          author_id: string
+          created_at?: string
+          deleted_at?: string | null
+          gospel_presentations?: number
+          id?: string
+          notes?: string | null
+          organization_id: string
+          prayer_requests?: number
+          professions_of_faith?: number
+          reconciliations?: number
+          referrals?: number
+          report_date: string
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          approaches?: number
+          author_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          gospel_presentations?: number
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          prayer_requests?: number
+          professions_of_faith?: number
+          reconciliations?: number
+          referrals?: number
+          report_date?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evangelism_reports_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evangelism_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evangelism_reports_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardians: {
         Row: {
           created_at: string
@@ -536,6 +612,7 @@ export type Database = {
     Functions: {
       generate_trip_access_code: { Args: never; Returns: string }
       get_trip_public: { Args: { p_code: string }; Returns: string }
+      is_group_leader: { Args: { p_trip_id: string }; Returns: boolean }
       is_org_member: { Args: { p_organization_id: string }; Returns: boolean }
       is_trip_admin: { Args: { p_trip_id: string }; Returns: boolean }
       is_trip_member: { Args: { p_trip_id: string }; Returns: boolean }
@@ -577,10 +654,10 @@ export type Database = {
         | "identity_document"
         | "authorization"
         | "photo"
+        | "other"
         | "commitment_term"
         | "national_travel_authorization"
-        | "other"
-      member_role: "collaborator" | "administrator"
+      member_role: "collaborator" | "administrator" | "group_leader"
       traveler_sex: "male" | "female" | "other" | "prefer_not_say"
       trip_status: "draft" | "active" | "archived"
     }
@@ -720,11 +797,11 @@ export const Constants = {
         "identity_document",
         "authorization",
         "photo",
+        "other",
         "commitment_term",
         "national_travel_authorization",
-        "other",
       ],
-      member_role: ["collaborator", "administrator"],
+      member_role: ["collaborator", "administrator", "group_leader"],
       traveler_sex: ["male", "female", "other", "prefer_not_say"],
       trip_status: ["draft", "active", "archived"],
     },

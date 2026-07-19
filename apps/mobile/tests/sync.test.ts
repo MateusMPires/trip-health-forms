@@ -49,6 +49,31 @@ describe('serializeRowForMirror', () => {
     expect(serialized.deleted_at).toBe('2026-07-03T08:00:00+00:00');
   });
 
+  it('keeps evangelism counters and drops the local-only pending_sync flag', () => {
+    const serialized = serializeRowForMirror('evangelism_reports', {
+      id: 'er-1',
+      organization_id: 'org-1',
+      trip_id: 'trip-1',
+      author_id: 'user-1',
+      report_date: '2026-07-15',
+      approaches: 12,
+      gospel_presentations: 8,
+      professions_of_faith: 3,
+      reconciliations: 1,
+      referrals: 2,
+      prayer_requests: 5,
+      notes: null,
+      created_at: '2026-07-15T20:00:00+00:00',
+      updated_at: '2026-07-15T20:00:00+00:00',
+      deleted_at: null,
+      // Local-only outbox flag: must never be mirrored back from the server.
+      pending_sync: 1,
+    });
+    expect(serialized.professions_of_faith).toBe(3);
+    expect(serialized.report_date).toBe('2026-07-15');
+    expect('pending_sync' in serialized).toBe(false);
+  });
+
   it('mirrors the trip_members role (used for offline admin gating)', () => {
     const serialized = serializeRowForMirror('trip_members', {
       id: 'tm-1',

@@ -100,6 +100,25 @@ export type DocumentRow = {
   pending_upload: number | null;
 };
 
+export type EvangelismReportRow = {
+  id: string;
+  organization_id: string;
+  trip_id: string;
+  author_id: string;
+  report_date: string;
+  approaches: number;
+  gospel_presentations: number;
+  professions_of_faith: number;
+  reconciliations: number;
+  referrals: number;
+  prayer_requests: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  /** Local-only: 1 while the row still needs pushing to the server (offline outbox). */
+  pending_sync: number | null;
+};
+
 export function toBool(value: number | null | undefined): boolean | null {
   if (value == null) return null;
   return value !== 0;

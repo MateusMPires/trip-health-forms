@@ -55,6 +55,22 @@ export default function TripsStackLayout() {
         options={{ title: '', headerBackButtonDisplayMode: 'minimal' }}
       />
       <Stack.Screen
+        name="[id]/evangelism/index"
+        options={{ title: 'Evangelismo', headerBackButtonDisplayMode: 'minimal' }}
+      />
+      <Stack.Screen
+        name="[id]/evangelism/[date]"
+        options={{
+          // Native sheet header: the title and the checkmark save action are set
+          // from the screen itself (EvangelismDayScreen) so they can read form state.
+          presentation: 'formSheet',
+          sheetAllowedDetents: [1],
+          sheetGrabberVisible: true,
+          sheetCornerRadius: 24,
+          contentStyle: { backgroundColor: theme.colors.groupedBackground },
+        }}
+      />
+      <Stack.Screen
         name="join"
         options={{ title: 'Entrar em uma viagem', presentation: 'formSheet', headerShown: true }}
       />

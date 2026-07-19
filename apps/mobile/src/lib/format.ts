@@ -3,6 +3,7 @@
 import type {
   ConsentKind,
   DocumentKind,
+  EvangelismMetricKey,
   MedAuthorizationCategory,
   TravelerSex,
   TripStatus,
@@ -26,6 +27,17 @@ export const SYNC_TABLE_LABELS: Record<SyncTable, string> = {
   health_records: 'Fichas de saúde',
   consents: 'Consentimentos',
   documents: 'Documentos',
+  evangelism_reports: 'Relatórios de evangelismo',
+};
+
+// Evangelism report metrics, in funnel order (approaches → … → referrals) + prayer.
+export const EVANGELISM_METRIC_LABELS: Record<EvangelismMetricKey, string> = {
+  approaches: 'Pessoas abordadas',
+  gospel_presentations: 'Apresentações do evangelho',
+  professions_of_faith: 'Decisões / salvações',
+  reconciliations: 'Reconciliações',
+  referrals: 'Encaminhamentos',
+  prayer_requests: 'Orações / pedidos',
 };
 
 export const TRIP_STATUS_LABELS: Record<TripStatus, string> = {

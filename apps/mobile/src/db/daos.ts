@@ -1,6 +1,7 @@
 // All local SQL lives here — features never write SQL themselves (CLAUDE.md).
 // Reads filter soft-deleted rows; the sync engine still mirrors them so
 // deletions propagate offline.
+import type { MemberRole } from '@viagem/core';
 import type { SQLiteBindValue } from 'expo-sqlite';
 
 import type { SyncTable } from '@/lib/config';
@@ -10,6 +11,7 @@ import { MIRROR_COLUMNS } from './schema';
 import type {
   ConsentRow,
   DocumentRow,
+  EvangelismReportRow,
   GuardianRow,
   HealthRecordRow,
   TravelerRow,
@@ -120,17 +122,28 @@ export async function getTrip(id: string): Promise<TripRow | null> {
 // ── Trip members (role) ──────────────────────────────────────────────────────
 
 /**
- * Whether the current user is an administrator of the trip, read from the local
- * mirror (works offline). RLS lets a member read their own trip_members row.
+ * The current user's role on the trip, read from the local mirror (works offline).
+ * RLS lets a member read their own trip_members row. Null when not a member.
  */
-export async function isCurrentUserTripAdmin(tripId: string, userId: string): Promise<boolean> {
+export async function getTripMemberRole(
+  tripId: string,
+  userId: string,
+): Promise<MemberRole | null> {
   const db = await getDb();
-  const row = await db.getFirstAsync<{ role: string }>(
+  const row = await db.getFirstAsync<{ role: MemberRole }>(
     `SELECT role FROM trip_members
      WHERE trip_id = ? AND user_id = ? AND deleted_at IS NULL`,
     [tripId, userId],
   );
-  return row?.role === 'administrator';
+  return row?.role ?? null;
+}
+
+/**
+ * Whether the current user is an administrator of the trip, read from the local
+ * mirror (works offline). RLS lets a member read their own trip_members row.
+ */
+export async function isCurrentUserTripAdmin(tripId: string, userId: string): Promise<boolean> {
+  return (await getTripMemberRole(tripId, userId)) === 'administrator';
 }
 
 // ── Travelers ────────────────────────────────────────────────────────────────
@@ -325,4 +338,148 @@ export async function listPendingUploads(): Promise<DocumentRow[]> {
 export async function clearPendingUpload(id: string): Promise<void> {
   const db = await getDb();
   await db.runAsync('UPDATE documents SET pending_upload = 0 WHERE id = ?', [id]);
+}
+
+// ── Evangelism reports (group-leader, offline-first write-back) ───────────────
+
+/** Consolidated daily totals across every group leader on the trip. */
+export type EvangelismDaySummary = {
+  report_date: string;
+  approaches: number;
+  gospel_presentations: number;
+  professions_of_faith: number;
+  reconciliations: number;
+  referrals: number;
+  prayer_requests: number;
+  /** How many leaders filed a report for this day. */
+  leader_count: number;
+};
+
+export async function sumEvangelismByDate(tripId: string): Promise<EvangelismDaySummary[]> {
+  const db = await getDb();
+  return db.getAllAsync<EvangelismDaySummary>(
+    `SELECT report_date,
+       SUM(approaches) AS approaches,
+       SUM(gospel_presentations) AS gospel_presentations,
+       SUM(professions_of_faith) AS professions_of_faith,
+       SUM(reconciliations) AS reconciliations,
+       SUM(referrals) AS referrals,
+       SUM(prayer_requests) AS prayer_requests,
+       COUNT(DISTINCT author_id) AS leader_count
+     FROM evangelism_reports
+     WHERE trip_id = ? AND deleted_at IS NULL
+     GROUP BY report_date
+     ORDER BY report_date DESC`,
+    [tripId],
+  );
+}
+
+/** The current user's own reports on the trip (one row per day they filed). */
+export async function listMyEvangelismReports(
+  tripId: string,
+  authorId: string,
+): Promise<EvangelismReportRow[]> {
+  const db = await getDb();
+  return db.getAllAsync<EvangelismReportRow>(
+    `SELECT * FROM evangelism_reports
+     WHERE trip_id = ? AND author_id = ? AND deleted_at IS NULL
+     ORDER BY report_date DESC`,
+    [tripId, authorId],
+  );
+}
+
+/**
+ * The current user's report for a specific day, if any — used to prefill the form
+ * and reuse its id so re-filing a day is an update, not a duplicate.
+ */
+export async function getMyEvangelismReport(
+  tripId: string,
+  authorId: string,
+  reportDate: string,
+): Promise<EvangelismReportRow | null> {
+  const db = await getDb();
+  return db.getFirstAsync<EvangelismReportRow>(
+    `SELECT * FROM evangelism_reports
+     WHERE trip_id = ? AND author_id = ? AND report_date = ? AND deleted_at IS NULL`,
+    [tripId, authorId, reportDate],
+  );
+}
+
+/** A locally-filed/edited report awaiting its push to the server. */
+export type LocalReportUpsert = {
+  id: string;
+  organization_id: string;
+  trip_id: string;
+  author_id: string;
+  report_date: string;
+  approaches: number;
+  gospel_presentations: number;
+  professions_of_faith: number;
+  reconciliations: number;
+  referrals: number;
+  prayer_requests: number;
+  notes: string | null;
+  /** ISO timestamp used for both created_at (new rows) and updated_at. */
+  timestamp: string;
+};
+
+/**
+ * Inserts or updates a report filed offline: `pending_sync = 1` marks it for the
+ * sync push. The caller resolves `id` (a reused server/local id when editing a day,
+ * a fresh uuid for a new day), so the ON CONFLICT(id) upsert edits in place. The
+ * row reconciles against the server row (same id) on the next pull.
+ */
+export async function upsertLocalReport(report: LocalReportUpsert): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    `INSERT INTO evangelism_reports (
+       id, organization_id, trip_id, author_id, report_date,
+       approaches, gospel_presentations, professions_of_faith, reconciliations,
+       referrals, prayer_requests, notes, created_at, updated_at, deleted_at, pending_sync
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 1)
+     ON CONFLICT (id) DO UPDATE SET
+       report_date = excluded.report_date,
+       approaches = excluded.approaches,
+       gospel_presentations = excluded.gospel_presentations,
+       professions_of_faith = excluded.professions_of_faith,
+       reconciliations = excluded.reconciliations,
+       referrals = excluded.referrals,
+       prayer_requests = excluded.prayer_requests,
+       notes = excluded.notes,
+       updated_at = excluded.updated_at,
+       deleted_at = NULL,
+       pending_sync = 1`,
+    [
+      report.id,
+      report.organization_id,
+      report.trip_id,
+      report.author_id,
+      report.report_date,
+      report.approaches,
+      report.gospel_presentations,
+      report.professions_of_faith,
+      report.reconciliations,
+      report.referrals,
+      report.prayer_requests,
+      report.notes,
+      report.timestamp,
+      report.timestamp,
+    ],
+  );
+}
+
+/** Reports filed offline that still need pushing to the server. */
+export async function listPendingReports(): Promise<EvangelismReportRow[]> {
+  const db = await getDb();
+  return db.getAllAsync<EvangelismReportRow>(
+    `SELECT * FROM evangelism_reports
+     WHERE pending_sync = 1 AND deleted_at IS NULL
+     ORDER BY created_at`,
+  );
+}
+
+/** Clears the pending flag once the report has been pushed to the server. */
+export async function clearPendingReportSync(id: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('UPDATE evangelism_reports SET pending_sync = 0 WHERE id = ?', [id]);
 }

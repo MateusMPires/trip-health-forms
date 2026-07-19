@@ -10,6 +10,7 @@ import { SYNC_PAGE_SIZE, SYNC_TABLES, type SyncTable } from '@/lib/config';
 import { supabase } from '@/lib/supabase';
 
 import { pushPendingDocuments } from '../documents/upload';
+import { pushPendingReports } from '../evangelism/push';
 import { nextCursor, serializeRowForMirror } from './transform';
 
 /** Progress of a running sync, reported before each step starts. */
@@ -64,9 +65,10 @@ async function pullTable(table: SyncTable): Promise<number> {
 }
 
 /**
- * Push any offline-added documents first (so the pull reconciles them), then a full
- * pull in dependency order (parents before children). The push is the app's only
- * write-back; everything else stays read-only / server-wins.
+ * Push any offline-filed writes first — documents and evangelism reports — so the
+ * pull reconciles them, then a full pull in dependency order (parents before
+ * children). These pushes are the app's only write-back; everything else stays
+ * read-only / server-wins.
  */
 export async function runSync(
   onProgress?: SyncProgressListener,
@@ -74,6 +76,7 @@ export async function runSync(
   const totalSteps = SYNC_TABLES.length + 1;
   onProgress?.({ step: 0, totalSteps, table: null });
   await pushPendingDocuments();
+  await pushPendingReports();
 
   let pulledRows = 0;
   for (const [index, table] of SYNC_TABLES.entries()) {

@@ -35,6 +35,8 @@ export type Theme = {
     danger: string;
     /** Semantic "attention" status (iOS system orange). */
     warning: string;
+    /** Semantic "informational" accent (iOS system blue). */
+    accent: string;
   };
 };
 
@@ -55,6 +57,7 @@ const light: Theme = {
     success: '#34C759',
     danger: '#FF3B30',
     warning: '#C93400',
+    accent: '#007AFF',
   },
 };
 
@@ -75,6 +78,7 @@ const dark: Theme = {
     success: '#30D158',
     danger: '#FF453A',
     warning: '#FF9F0A',
+    accent: '#0A84FF',
   },
 };
 

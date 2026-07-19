@@ -31,11 +31,16 @@ depois. Começar pequeno e ver funcionar antes de generalizar.
 - **Contrato de domínio compartilhado.** Validação, enums e regras (`isMinor`, consentimentos
   obrigatórios, tipos do viajante) vêm **sempre** de `@viagem/core`. Tipos das tabelas vêm de
   `@viagem/supabase` (`createClient<Database>`). **Nunca** redefinir schema/enum/regra dentro do app.
-- **Read-mostly com uma exceção de write-back.** O app **não escreve** dados de viajante/saúde.
+- **Read-mostly com exceções de write-back.** O app **não escreve** dados de viajante/saúde.
   Escritas permitidas, e só estas: (1) a RPC `join_trip` (líder se vincula a uma viagem por
   código); (2) **admin** da viagem **adicionar documentos** (Termo de Compromisso p/ todos;
-  Autorização de Viagem Nacional p/ menores de 16 — regra de `@viagem/core`). **Nunca** usar
-  `submit_traveler` — isso é do formulário público.
+  Autorização de Viagem Nacional p/ menores de 16 — regra de `@viagem/core`); (3) **group_leader**
+  **lançar/editar relatórios de evangelismo** (contadores diários agregados — sem dados pessoais de
+  terceiros). **Nunca** usar `submit_traveler` — isso é do formulário público.
+  - **`group_leader` é o papel `member_role` (migration 0018)** que lança evangelismo: herda a
+    leitura do `collaborator` (via `is_trip_member`) e é o único que escreve/edita relatórios; papel
+    único por membro. `administrator` **vê** o consolidado mas não lança. A RLS
+    (`is_group_leader` / `is_trip_admin`) é a fronteira real; o gating na UI é só UX.
   - **Adicionar documento é offline-first.** Grava a linha otimista no SQLite (coluna local
     `pending_upload`) + copia a foto pro sandbox; aparece na hora, sem rede. O motor de sync
     (`pushPendingDocuments`, no início do `runSync`) faz o **write-back**: sobe o binário
@@ -43,6 +48,11 @@ depois. Começar pequeno e ver funcionar antes de generalizar.
     seguinte reconcilia por id; **server-wins** continua valendo pra todo o resto. A RLS
     (`is_trip_admin`) é a fronteira real — o gating de admin na UI é só UX (lê `trip_members.role`
     espelhado).
+  - **Lançar relatório de evangelismo é offline-first.** Mesmo molde: grava a linha otimista em
+    `evangelism_reports` (coluna local `pending_sync`) e o sync (`pushPendingReports`, no início do
+    `runSync`) faz upsert por id (idempotente). Reabrir um dia reusa o id → edição, não duplicata.
+    Os dias vêm derivados da janela da viagem (`trips.starts_at`..`ends_at`); a linha só nasce ao
+    preencher.
 - **Segredos só no `.env`.** Apenas `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY`
   (anon key). **Jamais** a `SUPABASE_SERVICE_ROLE_KEY` no app. Nada de URL/chave/token hardcoded.
 - **Dado sensível offline é cifrado.** O banco local usa **SQLCipher**; a chave vive no
