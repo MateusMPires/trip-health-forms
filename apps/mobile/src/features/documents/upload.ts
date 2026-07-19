@@ -9,9 +9,13 @@ import * as Crypto from 'expo-crypto';
 import * as FileSystem from 'expo-file-system/legacy';
 
 import {
+  clearPendingDelete,
   clearPendingUpload,
+  deleteLocalDocument,
   insertLocalDocument,
+  listPendingDeletes,
   listPendingUploads,
+  markLocalDocumentDeleted,
   setDocumentCache,
 } from '@/db/daos';
 import type { DocumentRow, TravelerRow } from '@/db/types';
@@ -191,6 +195,86 @@ export async function pushPendingDocuments(): Promise<void> {
       await pushDocument(doc);
     } catch {
       // Keep pending_upload = 1 and retry on the next sync. No details logged (sensitive).
+    }
+  }
+}
+
+/**
+ * Deletes a document offline-first. If it never reached the server (still pending its first
+ * upload), just drops the cached binary and the local row — there is nothing to push.
+ * Otherwise it is soft-deleted locally (`deleted_at` + `pending_delete = 1`) and the sync
+ * push removes it on the server. It disappears from the UI at once either way.
+ */
+export async function deleteTravelerDocument(doc: DocumentRow): Promise<void> {
+  if (doc.pending_upload) {
+    if (doc.local_path) {
+      await FileSystem.deleteAsync(doc.local_path, { idempotent: true });
+    }
+    await deleteLocalDocument(doc.id);
+    return;
+  }
+  await markLocalDocumentDeleted(doc.id, new Date().toISOString());
+}
+
+/**
+ * Replaces a document: adds the new binary (offline) then soft-deletes the old one (offline).
+ * Adding first means a validation failure never deletes the old document. One document per
+ * kind, so the slot shows the new binary immediately (the old is soft-deleted and filtered
+ * out of `listDocuments`). Returns the new document id.
+ */
+export async function replaceTravelerDocument(params: {
+  traveler: TravelerRow;
+  kind: UploadableKind;
+  oldDoc: DocumentRow;
+  asset: PickedAsset;
+  userId: string;
+}): Promise<string> {
+  const { traveler, kind, oldDoc, asset, userId } = params;
+  const id = await addTravelerDocument({ traveler, kind, asset, userId });
+  await deleteTravelerDocument(oldDoc);
+  return id;
+}
+
+/**
+ * Pushes one soft-delete to the server: sets `deleted_at` on the row (the trigger bumps
+ * `updated_at`, so the deletion propagates to other devices on their next pull) and removes
+ * the binary from Storage (LGPD — the file is sensitive). Both are idempotent; a missing
+ * object is not treated as an error. On success clears the pending flag and drops the local
+ * cached binary. Errors bubble up so the row stays pending and retries on the next sync.
+ */
+async function pushDocumentDeletion(doc: DocumentRow): Promise<void> {
+  const deletedAt = doc.deleted_at ?? new Date().toISOString();
+
+  const { error: updateError } = await supabase
+    .from('documents')
+    .update({ deleted_at: deletedAt })
+    .eq('id', doc.id);
+  if (updateError) throw updateError;
+
+  const { error: removeError } = await supabase.storage
+    .from(doc.storage_bucket)
+    .remove([doc.storage_path]);
+  if (removeError) throw removeError;
+
+  await clearPendingDelete(doc.id);
+  if (doc.local_path) {
+    await FileSystem.deleteAsync(doc.local_path, { idempotent: true });
+  }
+  await setDocumentCache(doc.id, null, null);
+}
+
+/**
+ * Drains the delete outbox — soft-deletes every pending document on the server and removes
+ * its binary. Best-effort: a failure on one (offline / transient) leaves it pending for the
+ * next sync and does not block the others. Called at the start of runSync, before the pull.
+ */
+export async function pushPendingDeletions(): Promise<void> {
+  const pending = await listPendingDeletes();
+  for (const doc of pending) {
+    try {
+      await pushDocumentDeletion(doc);
+    } catch {
+      // Keep pending_delete = 1 and retry on the next sync. No details logged (sensitive).
     }
   }
 }

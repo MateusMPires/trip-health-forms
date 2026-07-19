@@ -291,4 +291,10 @@ export const LOCAL_MIGRATIONS: readonly string[] = [
   );
   CREATE INDEX idx_evangelism_reports_trip ON evangelism_reports (trip_id);
   `,
+  // Migration 4: local-only pending_delete flag on documents (offline delete outbox).
+  // The server soft-deletes (sets deleted_at) and we also remove the Storage binary on
+  // push; kept out of MIRROR_COLUMNS so sync upserts never overwrite it.
+  `
+  ALTER TABLE documents ADD COLUMN pending_delete INTEGER NOT NULL DEFAULT 0;
+  `,
 ];

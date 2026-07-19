@@ -74,6 +74,36 @@ describe('serializeRowForMirror', () => {
     expect('pending_sync' in serialized).toBe(false);
   });
 
+  it('keeps document server columns and drops the local-only outbox/cache columns', () => {
+    const serialized = serializeRowForMirror('documents', {
+      id: 'doc-1',
+      organization_id: 'org-1',
+      trip_id: 'trip-1',
+      traveler_id: 'trav-1',
+      kind: 'commitment_term',
+      storage_bucket: 'traveler-files',
+      storage_path: 'org/trip/trav/commitment_term/uuid-file.jpg',
+      file_name: 'file.jpg',
+      mime_type: 'image/jpeg',
+      size_bytes: 1000,
+      uploaded_by: 'user-1',
+      created_at: '2026-07-15T20:00:00+00:00',
+      updated_at: '2026-07-15T20:00:00+00:00',
+      deleted_at: null,
+      // Local-only outbox/cache columns: must never be mirrored back from the server.
+      local_path: '/cache/doc-1.jpg',
+      cached_at: '2026-07-15T20:00:00+00:00',
+      pending_upload: 1,
+      pending_delete: 1,
+    });
+    expect(serialized.kind).toBe('commitment_term');
+    expect(serialized.storage_path).toBe('org/trip/trav/commitment_term/uuid-file.jpg');
+    expect('pending_upload' in serialized).toBe(false);
+    expect('pending_delete' in serialized).toBe(false);
+    expect('local_path' in serialized).toBe(false);
+    expect('cached_at' in serialized).toBe(false);
+  });
+
   it('mirrors the trip_members role (used for offline admin gating)', () => {
     const serialized = serializeRowForMirror('trip_members', {
       id: 'tm-1',

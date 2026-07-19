@@ -340,6 +340,39 @@ export async function clearPendingUpload(id: string): Promise<void> {
   await db.runAsync('UPDATE documents SET pending_upload = 0 WHERE id = ?', [id]);
 }
 
+// ── Document delete outbox (admin-only, offline-first soft-delete) ────────────
+
+/**
+ * Soft-deletes a document locally and marks it for the sync push: it disappears from
+ * `listDocuments`/`listPendingUploads` at once (both filter `deleted_at IS NULL`) and the
+ * push (`pushPendingDeletions`) sets `deleted_at` on the server + removes the binary.
+ */
+export async function markLocalDocumentDeleted(id: string, deletedAt: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    'UPDATE documents SET deleted_at = ?, updated_at = ?, pending_delete = 1 WHERE id = ?',
+    [deletedAt, deletedAt, id],
+  );
+}
+
+/** Documents soft-deleted offline that still need pushing to the server. */
+export async function listPendingDeletes(): Promise<DocumentRow[]> {
+  const db = await getDb();
+  return db.getAllAsync<DocumentRow>('SELECT * FROM documents WHERE pending_delete = 1');
+}
+
+/** Clears the pending-delete flag once the server soft-delete + Storage removal succeeded. */
+export async function clearPendingDelete(id: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('UPDATE documents SET pending_delete = 0 WHERE id = ?', [id]);
+}
+
+/** Hard-removes a local document row — used when deleting one that never reached the server. */
+export async function deleteLocalDocument(id: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM documents WHERE id = ?', [id]);
+}
+
 // ── Evangelism reports (group-leader, offline-first write-back) ───────────────
 
 /** Consolidated daily totals across every group leader on the trip. */
