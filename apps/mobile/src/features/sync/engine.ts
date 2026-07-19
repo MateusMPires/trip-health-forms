@@ -9,7 +9,7 @@ import { upsertMirrorRows, getSyncCursor, setSyncCursor } from '@/db/daos';
 import { SYNC_PAGE_SIZE, SYNC_TABLES, type SyncTable } from '@/lib/config';
 import { supabase } from '@/lib/supabase';
 
-import { pushPendingDocuments } from '../documents/upload';
+import { pushPendingDeletions, pushPendingDocuments } from '../documents/upload';
 import { pushPendingReports } from '../evangelism/push';
 import { nextCursor, serializeRowForMirror } from './transform';
 
@@ -76,6 +76,7 @@ export async function runSync(
   const totalSteps = SYNC_TABLES.length + 1;
   onProgress?.({ step: 0, totalSteps, table: null });
   await pushPendingDocuments();
+  await pushPendingDeletions();
   await pushPendingReports();
 
   let pulledRows = 0;

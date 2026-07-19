@@ -94,10 +94,13 @@ export type DocumentRow = {
   mime_type: string | null;
   size_bytes: number | null;
   uploaded_by: string | null;
+  deleted_at: string | null;
   local_path: string | null;
   cached_at: string | null;
   /** Local-only: 1 while the binary + row still need pushing to the server (offline outbox). */
   pending_upload: number | null;
+  /** Local-only: 1 while a soft-delete (deleted_at + Storage removal) still needs pushing. */
+  pending_delete: number | null;
 };
 
 export type EvangelismReportRow = {
