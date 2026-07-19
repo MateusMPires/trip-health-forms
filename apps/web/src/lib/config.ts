@@ -19,10 +19,15 @@ export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 export const MAX_PRESCRIPTION_FILES = 5;
 
 // Accepted MIME types per document kind. Keys are DocumentKind from @viagem/core.
+// `commitment_term` and `national_travel_authorization` are added by trip admins from the
+// mobile app (photos of signed paper documents), never by the public form — they are listed
+// here only so the map covers every DocumentKind.
 export const ALLOWED_MIME_TYPES: Record<DocumentKind, readonly string[]> = {
   identity_document: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
   photo: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
   authorization: ['application/pdf'],
+  commitment_term: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
+  national_travel_authorization: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
   other: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
 };
 
